@@ -1,8 +1,8 @@
 build_and_store_wheels: &BUILD_AND_STORE_WHEELS
   install_cibuildwheel_script:
-    - python -m pip install cibuildwheel==2.11.2
+    - python3.9 -m pip install cibuildwheel==2.11.2
   run_cibuildwheel_script:
-    - cibuildwheel
+    - cibuildwheel --platform macos
   wheels_artifacts:
     path: "wheelhouse/*"
 
@@ -16,5 +16,5 @@ macos_task:
   install_pre_requirements_script:
     - brew install gcc
     - brew install python@3.9
-    - ln -s python3 /opt/homebrew/opt/python@3.9/bin/python
+    # - ln -s python3 /opt/homebrew/opt/python@3.9/bin/python
   <<: *BUILD_AND_STORE_WHEELS
