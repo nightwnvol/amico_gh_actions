@@ -4,7 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp39]
+        py: [cp38]
         plat:
           - [ubuntu-20.04, manylinux, x86_64]
           # - [windows-2019, win, amd64]
