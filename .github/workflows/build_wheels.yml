@@ -7,7 +7,7 @@ jobs:
         py: [cp39]
         plat:
           - [ubuntu-20.04, manylinux, x86_64]
-          - [windows-2019, win, amd64]
+          # - [windows-2019, win, amd64]
           #- [macos-11, macosx, x86_64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
