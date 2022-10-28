@@ -1,0 +1,28 @@
+name: Build
+on: [push]
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        py: [cp39]
+        plat:
+          # - [ubuntu-20.04, manylinux, x86_64]
+          # - [windows-2019, win, amd64]
+          - [macos-11, macosx, arm64]
+    name: Build wheels
+    runs-on: ${{ matrix.plat[0] }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        if: matrix.plat[0] == 'ubuntu-20.04'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: amd64
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.11.1
+        env:
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
