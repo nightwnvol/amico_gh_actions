@@ -6,9 +6,9 @@ jobs:
       matrix:
         py: [cp39]
         plat:
-          # - [ubuntu-20.04, manylinux, x86_64]
-          # - [windows-2019, win, amd64]
-          - [macos-11, macosx, arm64]
+          - [ubuntu-20.04, manylinux, x86_64]
+          - [windows-2019, win, amd64]
+          #- [macos-11, macosx, x86_64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
@@ -20,7 +20,7 @@ jobs:
         with:
           platforms: amd64
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.1
+        uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
       - uses: actions/upload-artifact@v3
