@@ -23,7 +23,7 @@ archs = ["x86_64"]
 environment = {REPAIR_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21", MACOSX_DEPLOYMENT_TARGET="11.0"}
 before-all = [
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
-    "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1 CC=cc FC=gfortran-9"
+    "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1 CC=cc FC=gfortran"
 ]
 repair-wheel-command = "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 archs = ["x86_64", "arm64"]
