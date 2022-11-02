@@ -4,11 +4,12 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp38]
+        py: [cp39]
         plat:
-          - [ubuntu-20.04, manylinux, x86_64]
+          # - [ubuntu-20.04, manylinux, x86_64]
           # - [windows-2019, win, amd64]
-          #- [macos-11, macosx, x86_64]
+          # - [macos-11, macosx, x86_64]
+          - [ghcr.io/cirruslabs/macos-monterey-xcode, macosx, arm64] # Apple Silicon runner from Cirrus CI
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
