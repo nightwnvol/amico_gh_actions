@@ -6,8 +6,9 @@ build_and_store_wheels: &BUILD_AND_STORE_WHEELS
   wheels_artifacts:
     path: 'wheelhouse/*'
 
-macos_task:
-  name: Build macOS arm64 wheel.
+build_macos_task:
+  name: Build macOS arm64 wheel
+  trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode # Apple Silicon runner!! (arm64)
   env:

@@ -1,8 +1,5 @@
-name: Build
-on:
-  push:
-    branches:
-      - 'main'
+name: Build Windows and Linux wheels
+on: workflow_dispatch
 jobs:
   build_wheels:
     strategy:
@@ -22,10 +19,11 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: amd64
-      - name: Build wheels
+      - name: Build
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
