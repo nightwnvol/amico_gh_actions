@@ -19,6 +19,7 @@ import dipy.reconst.dti as dti
 from amico.util import PRINT, LOG, WARNING, ERROR, get_verbose, Loader
 from pkg_resources import get_distribution
 from joblib import cpu_count
+from threadpoolctl import ThreadpoolController
 from tqdm import tqdm
 
 
@@ -92,7 +93,10 @@ class Evaluation :
         self.set_config('DWI-SNR', None)                # SNR of DWI image: SNR = b0/sigma
         self.set_config('doDirectionalAverage', False)  # To perform the directional average on the signal of each shell
         self.set_config('parallel_jobs', -1)            # Number of jobs to be used in multithread-enabled parts of code
-        self.set_config('DTI_fit_method', 'WLS')        # Fit method for the Diffusion Tensor model (dipy). Default is WSL.
+        self.set_config('DTI_fit_method', 'WLS')        # Fit method for the Diffusion Tensor model (dipy) (default: 'WLS')
+        self.set_config('BLAS_threads', 1)              # Number of threads used in the threadpool-backend of common BLAS implementations (dafault: 1)
+
+        self._controller = ThreadpoolController()
 
     def set_config( self, key, value ) :
         self.CONFIG[ key ] = value
@@ -293,7 +297,7 @@ class Evaluation :
             Maximum SH order to use for the rotation procedure (default : 12)
         ndirs : int
             Number of directions on the half of the sphere representing the possible orientations of the response functions (default : 32761)
-         """
+        """
         if self.scheme is None :
             ERROR( 'Scheme not loaded; call "load_data()" first' )
         if self.model is None :
@@ -326,7 +330,8 @@ class Evaluation :
 
         # Dispatch to the right handler for each model
         tic = time.time()
-        self.model.generate( self.get_config('ATOMS_path'), aux, idx_IN, idx_OUT, ndirs )
+        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+            self.model.generate( self.get_config('ATOMS_path'), aux, idx_IN, idx_OUT, ndirs )
         LOG( f'   [ {time.time() - tic:.1f} seconds ]' )
 
 
@@ -349,7 +354,8 @@ class Evaluation :
         self.htable = amico.lut.load_precomputed_hash_table( self.get_config('ndirs') )
 
         # Dispatch to the right handler for each model
-        self.KERNELS = self.model.resample( self.get_config('ATOMS_path'), idx_OUT, Ylm_OUT, self.get_config('doMergeB0'), self.get_config('ndirs') )
+        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+            self.KERNELS = self.model.resample( self.get_config('ATOMS_path'), idx_OUT, Ylm_OUT, self.get_config('doMergeB0'), self.get_config('ndirs') )
 
         LOG( f'   [ {time.time() - tic:.1f} seconds ]')
 
@@ -358,7 +364,6 @@ class Evaluation :
         """Fit the model to the data.
         Call the appropriate fit() method of the actual model used.
         """
-
         if self.niiDWI is None :
             ERROR( 'Data not loaded; call "load_data()" first' )
         if self.model is None :
@@ -400,14 +405,17 @@ class Evaluation :
         t = time.time()
         # NOTE binary mask indexing
         self.y = self.niiDWI_img[self.niiMASK_img==1, :].astype(np.double)
-        self.y[self.y < 0] = 0        
+        self.y[self.y < 0] = 0
+
         # precompute directions
         if not self.get_config('doDirectionalAverage') and DTI is not None:
             with Loader(message='Precomputing directions ({0})'.format(self.get_config('DTI_fit_method')), verbose=get_verbose()):
                 self.DIRs = np.squeeze(DTI.fit(self.y).directions)
+
         # call the fit() method of the actual model
-        with Loader(message='Fitting the model', verbose=get_verbose()):
-            results = self.model.fit(self)
+        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+            with Loader(message='Fitting the model', verbose=get_verbose()):
+                results = self.model.fit(self)
         self.set_config('fit_time', time.time()-t)
         LOG( '   [ %s ]' % ( time.strftime("%Hh %Mm %Ss", time.gmtime(self.get_config('fit_time')) ) ) )
         # =========================

@@ -11,7 +11,6 @@ from abc import ABC, abstractmethod
 from amico.util import PRINT, ERROR, get_verbose
 from amico.synthesis import Stick, Zeppelin, Ball, CylinderGPD, SphereGPD, Astrosticks, NODDIIntraCellular, NODDIExtraCellular, NODDIIsotropic
 from joblib import Parallel, delayed
-from threadpoolctl import threadpool_limits
 
 cimport cython
 from libc.stdlib cimport malloc, free
@@ -470,7 +469,7 @@ class CylinderZeppelinBall( BaseModel ) :
 
         return KERNELS
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -651,7 +650,7 @@ class NODDI( BaseModel ) :
         params['lambda2'] = lambda2
         return params
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+    
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ):
         scheme_high = amico.lut.create_high_resolution_scheme( self.scheme )
 
@@ -679,7 +678,7 @@ class NODDI( BaseModel ) :
             np.save( pjoin( out_path, f'A_{nATOMS:03d}.npy') , lm )
             progress.update()
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+    
     def resample( self, in_path, idx_out, Ylm_out, doMergeB0, ndirs ):
         nATOMS = len(self.IC_ODs)*len(self.IC_VFs) + 1
         if doMergeB0:
@@ -720,7 +719,7 @@ class NODDI( BaseModel ) :
 
         return KERNELS
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+    
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -1034,7 +1033,7 @@ class FreeWater( BaseModel ) :
 
         return KERNELS
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+    
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -1357,7 +1356,7 @@ class SANDI( BaseModel ) :
 
         return KERNELS
 
-    @threadpool_limits.wrap(limits=1, user_api='blas')
+    
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
