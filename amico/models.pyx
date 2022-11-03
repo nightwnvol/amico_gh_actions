@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from amico.util import PRINT, ERROR, get_verbose
 from amico.synthesis import Stick, Zeppelin, Ball, CylinderGPD, SphereGPD, Astrosticks, NODDIIntraCellular, NODDIExtraCellular, NODDIIsotropic
 from joblib import Parallel, delayed
+from threadpoolctl import threadpool_limits
 
 cimport cython
 from libc.stdlib cimport malloc, free
@@ -31,14 +32,14 @@ from amico.lut cimport dir_to_lut_idx
 #     warnings.warn('Module "spams" does not seems to be installed; perhaps you will not be able to call the fit() functions of some models.')
 
 cdef extern from 'wrappers.h':
-    cdef void nnls(const double *A, const double *y, const int m, const int n, double *x, double *rnorm) nogil
-    cdef void lasso(double *A, double *y, const int m, const int n, const double lambda1, const double lambda2, double *x) nogil
+    cdef void nnls(const double *A, const double *y, const int m, const int n, double *x, double &rnorm) nogil
+    cdef void lasso(double *A, double *y, const int m, const int p, const int n, const double lambda1, const double lambda2, double *x) nogil
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void _compute_nrmse(double [::1, :]A_view, double [::1]y_view, double [::1]x_view, double *nrmse_view) nogil:
     cdef double den = 0.0
-    cdef double *y_est = <double *> malloc(sizeof(double) * y_view.shape[0])
+    cdef double *y_est = <double *>malloc(sizeof(double) * y_view.shape[0])
 
     cdef Py_ssize_t i, j
     for i in range(A_view.shape[0]):
@@ -161,9 +162,7 @@ class BaseModel(ABC) :
 
     @abstractmethod
     def fit(self, evaluation):
-        """
-        For fitting the model to the data.
-        Data is divided into chunks (as many as the number of threads setted with the 'parallel_jobs' parameter) and fitted in parallel.
+        """For fitting the model to the data.
         NB: do not change the signature!
 
         Parameters
@@ -188,6 +187,8 @@ class BaseModel(ABC) :
             self.chunks.append((i, j))
         if self.chunks[-1][1] != n:
             self.chunks[-1] = (self.chunks[-1][0], n)
+
+        # TODO move return steps here
 
 
 
@@ -469,7 +470,7 @@ class CylinderZeppelinBall( BaseModel ) :
 
         return KERNELS
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -556,7 +557,7 @@ class CylinderZeppelinBall( BaseModel ) :
                 A_view[:, n_rs + n_perp:] = kernels_iso_view[:, :]
 
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
 
                 # estimates
                 f1 = 0.0
@@ -650,7 +651,7 @@ class NODDI( BaseModel ) :
         params['lambda2'] = lambda2
         return params
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ):
         scheme_high = amico.lut.create_high_resolution_scheme( self.scheme )
 
@@ -678,7 +679,7 @@ class NODDI( BaseModel ) :
             np.save( pjoin( out_path, f'A_{nATOMS:03d}.npy') , lm )
             progress.update()
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def resample( self, in_path, idx_out, Ylm_out, doMergeB0, ndirs ):
         nATOMS = len(self.IC_ODs)*len(self.IC_VFs) + 1
         if doMergeB0:
@@ -719,7 +720,7 @@ class NODDI( BaseModel ) :
 
         return KERNELS
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -772,6 +773,7 @@ class NODDI( BaseModel ) :
         cdef float [::1]kernels_icvf_view = kernels['icvf']
         cdef float [::1]kernels_kappa_view = kernels['kappa']
 
+        # TODO reorganize comments
         # y
         if not y.flags['C_CONTIGUOUS']:
             y = np.ascontiguousarray(y)
@@ -826,7 +828,7 @@ class NODDI( BaseModel ) :
                 A_view[:, n_atoms-1] = kernels_iso_view
 
                 # fit_1 (CSF)
-                nnls(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], &x_view[0], &r_norm)
+                nnls(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], &x_view[0], r_norm)
 
                 # fit_2 (IC + EC)
                 for j in range(A2_view.shape[0]):
@@ -841,7 +843,7 @@ class NODDI( BaseModel ) :
                         y2_view[j] = y2_view[j] - x_view[n_atoms-2] * 1.0
                     if y2_view[j] < 0.0:
                         y2_view[j] = 0.0
-                lasso(&A2_view[0, 0], &y2_view[0], A2_view.shape[0], A2_view.shape[1], lambda1, lambda2, &x_view[0])
+                lasso(&A2_view[0, 0], &y2_view[0], A2_view.shape[0], A2_view.shape[1], 1, lambda1, lambda2, &x_view[0])
 
                 # fit_3 (debias coefficients)
                 positive_count = 0
@@ -855,7 +857,7 @@ class NODDI( BaseModel ) :
                 for j in range(A3_view.shape[0]):
                     for k in range(positive_count):
                         A3_view[j, k] = A_view[j, positive_indices_view[k]]
-                nnls(&A3_view[0, 0], &y_view[i, 0], A3_view.shape[0], positive_count, &x3_view[0], &r_norm)
+                nnls(&A3_view[0, 0], &y_view[i, 0], A3_view.shape[0], positive_count, &x3_view[0], r_norm)
                 for j in range(positive_count):
                     x_view[positive_indices_view[j]] = x3_view[j]
 
@@ -1032,7 +1034,7 @@ class FreeWater( BaseModel ) :
 
         return KERNELS
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -1123,7 +1125,7 @@ class FreeWater( BaseModel ) :
                 A_view[:, n_perp:] = kernels_CSF_view[:, :]
 
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
 
                 # estimates
                 x_sum = 0.0
@@ -1355,7 +1357,7 @@ class SANDI( BaseModel ) :
 
         return KERNELS
 
-
+    @threadpool_limits.wrap(limits=1, user_api='blas')
     def fit(self, evaluation):
         super().fit(evaluation)
         configs = {
@@ -1431,7 +1433,7 @@ class SANDI( BaseModel ) :
         with nogil:
             for i in range(y_view.shape[0]):
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
                 for j in range(kernels_norms_view.shape[0]):
                     x_view[j] = x_view[j] * kernels_norms_view[j]
 

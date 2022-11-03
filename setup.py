@@ -60,6 +60,7 @@ extensions = [
       )
 ]
 
+# TODO move metadata to setup.cfg
 setup(name=info.NAME,
       version=info.VERSION,
       description=info.DESCRIPTION,
@@ -69,6 +70,6 @@ setup(name=info.NAME,
       url=info.URL,
       license=info.LICENSE,
       packages=find_packages(),
-      install_requires=['packaging', 'wheel', 'numpy>=1.12', 'scipy>=1.0', 'dipy>=1.0', 'tqdm>=4.56.0', 'joblib>=1.0.1'],
+      install_requires=['packaging', 'wheel', 'numpy>=1.12', 'scipy>=1.0', 'dipy>=1.0', 'tqdm>=4.56.0', 'joblib>=1.0.1', 'threadpoolctl>=3.1.0'],
       package_data={'amico': ['directions/*.bin']},
       ext_modules=cythonize(extensions))

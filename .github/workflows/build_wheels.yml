@@ -1,15 +1,17 @@
 name: Build
-on: [push]
+on:
+  push:
+    branches:
+      - 'main'
 jobs:
   build_wheels:
     strategy:
       matrix:
         py: [cp39]
         plat:
-          # - [ubuntu-20.04, manylinux, x86_64]
-          # - [windows-2019, win, amd64]
-          # - [macos-11, macosx, x86_64]
-          - [ghcr.io/cirruslabs/macos-monterey-xcode, macosx, arm64] # Apple Silicon runner from Cirrus CI
+          - [ubuntu-20.04, manylinux, x86_64]
+          - [windows-2019, win, amd64]
+          # - [macos-11, macosx, x86_64] # .cirrus.yml
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:

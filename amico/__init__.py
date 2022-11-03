@@ -6,11 +6,12 @@ from __future__ import absolute_import, division, print_function
 # NOTE not compatible with PEP 302-based import hooks
 # extra_dll_dir = os.path.join(os.path.dirname(__file__), '.libs')
 
-# from importlib.resources import files # NOTE Python >= 3.9
-# from importlib_resources import files # NOTE backport of Python standard library importlib.resources module for older Pythons
-# extra_dll_dir = files('amico').joinpath('.libs')
-# if sys.platform == 'win32' and os.path.isdir(extra_dll_dir):
-#     os.add_dll_directory(extra_dll_dir)
+# if sys.platform == 'win32':
+#     # from importlib.resources import files # NOTE Python >= 3.9
+#     from importlib_resources import files # NOTE backport of Python standard library importlib.resources module for older Pythons
+#     extra_dll_dir = files('amico').joinpath('.libs')
+#     if os.path.isdir(extra_dll_dir):
+#         os.add_dll_directory(extra_dll_dir)
 
 from .core import Evaluation, setup
 from .util import set_verbose, get_verbose
