@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to AMICO will be documented in this file.
 
-## [1.6.0] - 2022-##-##
+## [2.0.0] - 2022-##-##
 
 ### Changed
 - Implement 'fit' method of the models in Cython (models.pyx)
@@ -10,8 +10,9 @@ All notable changes to AMICO will be documented in this file.
 
 ### Added
 - C++ wrappers for 'nnls' and 'lasso' functions
-- Possibility to choose the fitting method for the Diffusion Tensor model (dipy)
-- Loader-like context manager
+- 'DTI_fit_method' config to choose the fitting method for the Diffusion Tensor model (dipy)
+- 'BLAS_threads' config to set the number of threads used in the threadpool-backend of common BLAS implementations (e.g. OpenBLAS)
+- Loader-like context manager 'util.Loader()'
 
 ## [1.5.1] - 2022-09-21
 
