@@ -1,0 +1,11 @@
+site_name: nightdocs
+repo_url: https://github.com/nightwnvol/amico_gh_actions
+nav:
+  - Home: 'index.md'
+  - Install: 'installation.md'
+  - Credits: 'credits.md'
+theme:
+  name: readthedocs
+  locale: en
+markdown_extensions:
+  - admonition
