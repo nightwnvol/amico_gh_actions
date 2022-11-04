@@ -29,3 +29,6 @@ AMICO fits the models to the data using the [SPArse Modeling Software (SPAMS)](h
 
 !!! note
     This implementation of AMICO **does not require** the [NODDI MATLAB toolbox](http://mig.cs.ucl.ac.uk/index.php?n=Download.NODDI) to be present on your system; all the necessary MATLAB functions for generating the response functions of the NODDI model have in fact been ported to Python.
+
+!!! warning
+    This is a feature of the new v2.0.0!
