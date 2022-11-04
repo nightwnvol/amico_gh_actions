@@ -7,5 +7,6 @@ nav:
 theme:
   name: readthedocs
   locale: en
+  highlightjs: true
 markdown_extensions:
   - admonition
