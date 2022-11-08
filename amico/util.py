@@ -297,5 +297,3 @@ class Loader:
             print(f"\r\t* {self.message:{self.padding}}{self.end}")
         if self.verbose == 2:
             print(f"{'':{self.padding}}{self.end}")
-            print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='')
-            print(f"\r\t* {self.message:{self.padding}}{self.end}")
