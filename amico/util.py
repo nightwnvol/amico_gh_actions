@@ -278,12 +278,12 @@ class Loader:
             for step in itertools.cycle(self._steps):
                 if self._done:
                     break
-                # print('\r\t* {0:{2}}{1}'.format(self.message, step, self.padding), end='', flush=True)
-                print(f"\r\t* {self.message:{self.padding}}{step}", end='', flush=True)
+                # print('\r\t* {0:{2}}{1}'.format(self.message, step, self.padding), end='')
+                print(f"\r\t* {self.message:{self.padding}}{step}", end='')
                 time.sleep(self.timeout)
         if self.verbose == 2:
-            # print('\r\t* {0}'.format(self.message), end='', flush=True)
-            print(f"\r\t* {self.message}", end='', flush=True)
+            # print('\r\t* {0}'.format(self.message), end='')
+            print(f"\r\t* {self.message}", end='')
 
     def start(self):
         self._thread.start()
@@ -291,7 +291,7 @@ class Loader:
     def stop(self):
         self._done = True
         if self.verbose > 1:
-            # print('\r\t  {0}'.format(' ' * (len(self.message) + self._n + self.padding)), end='', flush=True)
-            print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='', flush=True)
-            # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding), flush=True)
-            print(f"\r\t* {self.message:{self.padding}}{self.end}", flush=True)
+            # print('\r\t  {0}'.format(' ' * (len(self.message) + self._n + self.padding)), end='')
+            print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='')
+            # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding))
+            print(f"\r\t* {self.message:{self.padding}}{self.end}")
