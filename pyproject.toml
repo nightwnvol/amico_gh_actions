@@ -10,6 +10,10 @@ before-all = "7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\""
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair --add-path OpenBLAS-0.3.21\\bin -w {dest_dir} {wheel}"
 archs = ["AMD64"]
+test-command = [
+    "7z x {project}/test/demo.zip -o{project}/test/demo",
+    "py {project}/test/noddi.py"
+]
 
 [tool.cibuildwheel.linux]
 environment = {LD_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21"}
