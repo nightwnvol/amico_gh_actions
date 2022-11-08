@@ -1,8 +1,4 @@
-from os import environ
-environ['OPENBLAS_NUM_THREADS'] = '1'
-
 from os.path import join as pjoin
-import numpy as np
 import amico
 
 # version
