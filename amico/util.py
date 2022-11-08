@@ -296,4 +296,4 @@ class Loader:
             # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding))
             print(f"\r\t* {self.message:{self.padding}}{self.end}")
         if self.verbose == 2:
-            print(f"{'':{self.padding}}{self.end}")
+            print(f"  {self.end}")
