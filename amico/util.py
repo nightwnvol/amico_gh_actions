@@ -283,15 +283,19 @@ class Loader:
                 time.sleep(self.timeout)
         if self.verbose == 2:
             # print('\r\t* {0}'.format(self.message), end='')
-            print(f"\r\t* {self.message}", end='')
+            print(f"\t* {self.message}", end='')
 
     def start(self):
         self._thread.start()
 
     def stop(self):
         self._done = True
-        if self.verbose > 1:
+        if self.verbose == 3:
             # print('\r\t  {0}'.format(' ' * (len(self.message) + self._n + self.padding)), end='')
             print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='')
             # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding))
+            print(f"\r\t* {self.message:{self.padding}}{self.end}")
+        if self.verbose == 2:
+            print(f"{'':{self.padding}}{self.end}")
+            print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='')
             print(f"\r\t* {self.message:{self.padding}}{self.end}")
