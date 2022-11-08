@@ -1,4 +1,5 @@
 from os.path import join as pjoin
+import pathlib
 import amico
 
 # version
@@ -18,8 +19,8 @@ mask = 'brain_mask.img'
 b0_thr = 0
 ndirs = 500
 # paths
-study_path = pjoin('.')
-out_path = pjoin('.', 'res_' + ver, sub)
+study_path = pjoin(pathlib.Path(__file__).parent.resolve())
+out_path = pjoin(pathlib.Path(__file__).parent.resolve(), 'res_' + ver, sub)
 amico.setup()
 amico.util.fsl2scheme(bvalsFilename=pjoin(study_path, sub, bval), bvecsFilename=pjoin(study_path, sub, bvec), schemeFilename=pjoin(study_path, sub, scheme), bStep=b_step)
 ae = amico.Evaluation(study_path=study_path, subject=sub, output_path=out_path)
