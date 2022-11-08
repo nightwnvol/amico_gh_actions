@@ -5,7 +5,7 @@ import amico
 # version
 ver = amico.__version__
 # verbose
-amico.set_verbose(3)
+amico.set_verbose(2)
 # kernels
 regenerate = True
 print('\033[92m' + f'Running AMICO v{amico.__version__}' + '\033[0m')
