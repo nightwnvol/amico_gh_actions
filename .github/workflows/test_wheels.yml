@@ -1,4 +1,4 @@
-name: Test AMICO on Windows (x64)
+name: Build and test AMICO wheels (Windows, Linux)
 on: workflow_dispatch
 jobs:
   build_and_test_wheels:
