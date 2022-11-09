@@ -8,7 +8,7 @@ build-verbosity = 3
 
 [tool.cibuildwheel.windows]
 before-all = [
-    "7z x test/demo.zip -otest/demo",
+    "7z x test/demo.zip -otest/demo", # NOTE move in before-test?
     "7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\""
 ]
 before-build = "pip install delvewheel"
@@ -18,7 +18,7 @@ archs = ["AMD64"]
 [tool.cibuildwheel.linux]
 environment = {LD_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21"}
 before-all = [
-    "unzip test/demo.zip -d test/demo",
+    "unzip test/demo.zip -d test/demo", # NOTE move in before-test?
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
