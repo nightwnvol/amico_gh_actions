@@ -236,12 +236,11 @@ class Loader:
     """
     A loader-like context manager
     """
-    def __init__(self, message='Loading', end='[OK]', timeout=0.05, type=1, padding=32, verbose=3):
+    def __init__(self, message='Loading', end='[OK]', timeout=0.05, type=1, verbose=3):
         self.message = message
         self.end = end
         self.timeout = timeout
         self.type = type
-        self.padding = padding
         self.verbose = verbose
 
         self._n = 0
@@ -279,11 +278,11 @@ class Loader:
                 if self._done:
                     break
                 # print('\r\t* {0:{2}}{1}'.format(self.message, step, self.padding), end='')
-                print(f"\r\t* {self.message:{self.padding}}{step}", end='')
+                print(f"\r\t* {self.message}  {step}", end='', flush=True)
                 time.sleep(self.timeout)
         if self.verbose == 2:
             # print('\r\t* {0}'.format(self.message), end='')
-            print(f"\t* {self.message}", end='')
+            print(f"\t* {self.message}", end='', flush=True)
 
     def start(self):
         self._thread.start()
@@ -292,8 +291,8 @@ class Loader:
         self._done = True
         if self.verbose == 3:
             # print('\r\t  {0}'.format(' ' * (len(self.message) + self._n + self.padding)), end='')
-            print(f"\r\t  {' ' * (len(self.message) + self._n + self.padding)}", end='')
+            print(f"\r\t  {' ' * (len(self.message) + 2 + self._n)}", end='', flush=True)
             # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding))
-            print(f"\r\t* {self.message:{self.padding}}{self.end}")
+            print(f"\r\t* {self.message}  {self.end}")
         if self.verbose == 2:
             print(f"  {self.end}")

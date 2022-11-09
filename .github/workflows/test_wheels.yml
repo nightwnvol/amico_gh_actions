@@ -1,17 +1,23 @@
 name: Test AMICO on Windows (x64)
 on: workflow_dispatch
 jobs:
-  build_and_test:
+  build_and_test_wheels:
     strategy:
       matrix:
-        py: [cp39]
+        py: [cp39, cp310]
         plat:
           - [windows-2019, win, amd64]
+          - [ubuntu-20.04, manylinux, x86_64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up QEMU
+        if: matrix.plat[0] == 'ubuntu-20.04'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: amd64
       - name: Build
         uses: pypa/cibuildwheel@v2.11.2
         env:
