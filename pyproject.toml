@@ -3,7 +3,7 @@ requires = ["setuptools", "Cython"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-before-test = "7z x {project}/test/demo.zip -o{project}/test/demo"
+before-all = "7z x {project}/test/demo.zip -o{project}/test/demo"
 test-command = "python {project}/test/noddi.py"
 build-verbosity = 3
 
