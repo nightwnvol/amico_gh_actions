@@ -18,7 +18,7 @@ archs = ["AMD64"]
 [tool.cibuildwheel.linux]
 environment = {LD_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21"}
 before-all = [
-    "7z x test/demo.zip -otest/demo",
+    "unzip test/demo.zip -d test/demo",
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
