@@ -20,6 +20,7 @@ before-all = [
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
 archs = ["x86_64"]
+before-test = "sudo apt install -y p7zip-full p7zip-rar"
 
 [tool.cibuildwheel.macos]
 environment = {REPAIR_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21", MACOSX_DEPLOYMENT_TARGET="11.0"}
