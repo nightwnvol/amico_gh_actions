@@ -26,7 +26,7 @@ amico.util.fsl2scheme(bvalsFilename=pjoin(study_path, sub, bval), bvecsFilename=
 ae = amico.Evaluation(study_path=study_path, subject=sub, output_path=out_path)
 ae.set_config('doComputeRMSE', True)
 ae.set_config('doComputeNRMSE', True)
-ae.set_config('doSaveodulatedMaps', True)
+ae.set_config('doSaveModulatedMaps', True)
 ae.load_data(dwi_filename=dwi, scheme_filename=scheme, mask_filename=mask, b0_thr=b0_thr)
 ae.set_model('NODDI')
 ae.generate_kernels(regenerate=regenerate, ndirs=ndirs)
