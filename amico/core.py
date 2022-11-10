@@ -60,19 +60,20 @@ class Evaluation :
             Optionally sets a custom full path for the output. Leave as None
             for default behaviour - output in study_path/subject/AMICO/<MODEL>
         """
-        self.niiDWI      = None # set by "load_data" method
-        self.niiDWI_img  = None
-        self.scheme      = None
-        self.niiMASK     = None
-        self.niiMASK_img = None
-        self.model       = None # set by "set_model" method
-        self.KERNELS     = None # set by "load_kernels" method
-        self.y           = None # set by "fit" method
-        self.DIRs        = None # set by "fit" method
-        self.n_threads   = None # set by "fit" method
-        self.RESULTS     = None # set by "fit" method
-        self.mean_b0s    = None # set by "load_data" method
-        self.htable      = None
+        self.niiDWI         = None # set by "load_data" method
+        self.niiDWI_img     = None
+        self.scheme         = None
+        self.niiMASK        = None
+        self.niiMASK_img    = None
+        self.model          = None # set by "set_model" method
+        self.KERNELS        = None # set by "load_kernels" method
+        self.y              = None # set by "fit" method
+        self.DIRs           = None # set by "fit" method
+        self.n_threads      = None # set by "fit" method
+        self.BLAS_threads   = None # set by "generate_kernel", "load_kernels" and "fit" methods
+        self.RESULTS        = None # set by "fit" method
+        self.mean_b0s       = None # set by "load_data" method
+        self.htable         = None
 
         # store all the parameters of an evaluation with AMICO
         self.CONFIG = {}
@@ -93,8 +94,8 @@ class Evaluation :
         self.set_config('doDebiasSignal', False)        # Flag to remove Rician bias
         self.set_config('DWI-SNR', None)                # SNR of DWI image: SNR = b0/sigma
         self.set_config('doDirectionalAverage', False)  # To perform the directional average on the signal of each shell
-        self.set_config('parallel_jobs', -1)            # Number of jobs to be used in multithread-enabled parts of code
-        self.set_config('DTI_fit_method', 'WLS')        # Fit method for the Diffusion Tensor model (dipy) (default: 'WLS')
+        self.set_config('n_threads', -1)                # Number of jobs to be used in multithread-enabled parts of code (default: -1)
+        self.set_config('DTI_fit_method', 'OLS')        # Fit method for the Diffusion Tensor model (dipy) (default: 'OLS')
         self.set_config('BLAS_threads', 1)              # Number of threads used in the threadpool-backend of common BLAS implementations (dafault: 1)
 
         self._controller = ThreadpoolController()
@@ -305,6 +306,8 @@ class Evaluation :
         if not is_valid(ndirs):
             ERROR( 'Unsupported value for ndirs.\nNote: Supported values for ndirs are [1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 32761 (default)]' )
 
+        self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
+        
         # store some values for later use
         self.set_config('lmax', lmax)
         self.set_config('ndirs', ndirs)
@@ -330,7 +333,7 @@ class Evaluation :
 
         # Dispatch to the right handler for each model
         tic = time.time()
-        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+        with self._controller.limit(limits=self.BLAS_threads, user_api='blas'):
             self.model.generate( self.get_config('ATOMS_path'), aux, idx_IN, idx_OUT, ndirs )
         LOG( f'   [ {time.time() - tic:.1f} seconds ]' )
 
@@ -344,6 +347,8 @@ class Evaluation :
         if self.scheme is None :
             ERROR( 'Scheme not loaded; call "load_data()" first' )
 
+        self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
+
         tic = time.time()
         LOG( f'\n-> Resampling LUT for subject "{self.get_config("subject")}":' )
 
@@ -354,7 +359,7 @@ class Evaluation :
         self.htable = amico.lut.load_precomputed_hash_table( self.get_config('ndirs') )
 
         # Dispatch to the right handler for each model
-        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+        with self._controller.limit(limits=self.BLAS_threads, user_api='blas'):
             self.KERNELS = self.model.resample( self.get_config('ATOMS_path'), idx_OUT, Ylm_OUT, self.get_config('doMergeB0'), self.get_config('ndirs') )
 
         LOG( f'   [ {time.time() - tic:.1f} seconds ]')
@@ -372,11 +377,10 @@ class Evaluation :
             ERROR( 'Response functions not generated; call "generate_kernels()" and "load_kernels()" first' )
         if self.KERNELS['model'] != self.model.id :
             ERROR( 'Response functions were not created with the same model' )
-        self.n_threads = self.get_config('parallel_jobs')
-        if self.n_threads == -1 :
-            self.n_threads = cpu_count()
-        elif self.n_threads == 0 or self.n_threads < -1:
-            ERROR( 'Number of parallel jobs must be positive or -1' )
+
+        self.n_threads = self.get_config('n_threads') if self.get_config('n_threads') > 0 else cpu_count() if self.get_config('n_threads') == -1 else ERROR('Number of parallel threads must be positive or -1')
+        self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
+        if self.get_config('DTI_fit_method') not in ['OLS', 'WLS']: ERROR("DTI fit method must be 'OLS' or 'WLS'")
 
         self.set_config('fit_time', None)
         totVoxels = np.count_nonzero(self.niiMASK_img)
@@ -412,7 +416,7 @@ class Evaluation :
             with Loader(message='Precomputing directions ({0})'.format(self.get_config('DTI_fit_method')), verbose=get_verbose()):
                 self.DIRs = np.squeeze(DTI.fit(self.y).directions)
         # call the fit() method of the actual model
-        with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
+        with self._controller.limit(limits=self.BLAS_threads, user_api='blas'):
             with Loader(message='Fitting the model', verbose=get_verbose()):
                 results = self.model.fit(self)
         self.set_config('fit_time', time.time()-t)
@@ -469,8 +473,6 @@ class Evaluation :
                 RESULTS_path = RESULTS_path +'_'+ path_suffix
             self.RESULTS['RESULTS_path'] = RESULTS_path
             LOG( f'\n-> Saving output to "{pjoin(RESULTS_path, "*")}":' )
-
-            # delete previous output
             RESULTS_path = pjoin( self.get_config('DATA_path'), RESULTS_path )
         else:
             RESULTS_path = self.get_config('OUTPUT_path')
@@ -479,13 +481,14 @@ class Evaluation :
             self.RESULTS['RESULTS_path'] = RESULTS_path
             LOG( f'\n-> Saving output to "{pjoin(RESULTS_path, "*")}":' )
 
+        # delete previous output
         if not exists( RESULTS_path ) :
             makedirs( RESULTS_path )
         else :
             for f in glob.glob( pjoin(RESULTS_path,'*') ) :
                 remove( f )
 
-        # configuration
+        # configuration file
         PRINT('\t- configuration', end=' ')
         with open( pjoin(RESULTS_path,'config.pickle'), 'wb+' ) as fid :
             pickle.dump( self.CONFIG, fid, protocol=2 )
@@ -498,7 +501,7 @@ class Evaluation :
 
         # estimated orientations
         if not self.get_config('doDirectionalAverage'):
-            PRINT('\t- FIT_dir.nii.gz', end=' ')
+            PRINT('\t- fit_dir.nii.gz', end=' ')
             niiMAP_img = self.RESULTS['DIRs']
             niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
             niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
@@ -506,12 +509,12 @@ class Evaluation :
             niiMAP_hdr['cal_max'] = 1
             niiMAP_hdr['scl_slope'] = 1
             niiMAP_hdr['scl_inter'] = 0
-            nibabel.save( niiMAP, pjoin(RESULTS_path, 'FIT_dir.nii.gz') )
+            nibabel.save( niiMAP, pjoin(RESULTS_path, 'fit_dir.nii.gz') )
             PRINT(' [OK]')
 
         # fitting error
         if self.get_config('doComputeRMSE') :
-            PRINT('\t- FIT_rmse.nii.gz', end=' ')
+            PRINT('\t- fit_RMSE.nii.gz', end=' ')
             niiMAP_img = self.RESULTS['RMSE']
             niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
             niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
@@ -519,10 +522,10 @@ class Evaluation :
             niiMAP_hdr['cal_max'] = 1
             niiMAP_hdr['scl_slope'] = 1
             niiMAP_hdr['scl_inter'] = 0
-            nibabel.save( niiMAP, pjoin(RESULTS_path, 'FIT_rmse.nii.gz') )
+            nibabel.save( niiMAP, pjoin(RESULTS_path, 'fit_RMSE.nii.gz') )
             PRINT(' [OK]')
         if self.get_config('doComputeNRMSE') :
-            PRINT('\t- FIT_nrmse.nii.gz', end=' ')
+            PRINT('\t- fit_NRMSE.nii.gz', end=' ')
             niiMAP_img = self.RESULTS['NRMSE']
             niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
             niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
@@ -530,25 +533,26 @@ class Evaluation :
             niiMAP_hdr['cal_max'] = 1
             niiMAP_hdr['scl_slope'] = 1
             niiMAP_hdr['scl_inter'] = 0
-            nibabel.save( niiMAP, pjoin(RESULTS_path, 'FIT_nrmse.nii.gz') )
+            nibabel.save( niiMAP, pjoin(RESULTS_path, 'fit_NRMSE.nii.gz') )
             PRINT(' [OK]')
 
+        # corrected DWI (Free-Water)
         if self.get_config('doSaveCorrectedDWI') :
             if self.model.name == 'Free-Water' :
-                PRINT('\t- dwi_fw_corrected.nii.gz', end=' ')
+                PRINT('\t- DWI_corrected.nii.gz', end=' ')
                 niiMAP_img = self.RESULTS['DWI_corrected']
                 niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
                 niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
                 niiMAP_hdr['cal_min'] = 0
                 niiMAP_hdr['cal_max'] = 1
-                nibabel.save( niiMAP, pjoin(RESULTS_path, 'dwi_fw_corrected.nii.gz') )
+                nibabel.save( niiMAP, pjoin(RESULTS_path, 'DWI_corrected.nii.gz') )
                 PRINT(' [OK]')
             else :
                 WARNING( f'"doSaveCorrectedDWI" option not supported for "{self.model.name}" model' )
 
         # voxelwise maps
         for i in range( len(self.model.maps_name) ) :
-            PRINT(f'\t- FIT_{self.model.maps_name[i]}.nii.gz', end=' ')
+            PRINT(f'\t- fit_{self.model.maps_name[i]}.nii.gz', end=' ')
             niiMAP_img = self.RESULTS['MAPs'][:,:,:,i]
             niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
             niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
@@ -557,7 +561,7 @@ class Evaluation :
             niiMAP_hdr['cal_max'] = niiMAP_img.max()
             niiMAP_hdr['scl_slope'] = 1
             niiMAP_hdr['scl_inter'] = 0
-            nibabel.save( niiMAP, pjoin(RESULTS_path, f'FIT_{self.model.maps_name[i]}.nii.gz' ) )
+            nibabel.save( niiMAP, pjoin(RESULTS_path, f'fit_{self.model.maps_name[i]}.nii.gz' ) )
             PRINT(' [OK]')
 
         # modulated NDI and ODI maps (NODDI)
@@ -566,7 +570,7 @@ class Evaluation :
                 mod_maps = [name + '_modulated' for name in self.model.maps_name[:2]]
                 descr = [descr + ' modulated' for descr in self.model.maps_descr[:2]]
                 for i in range(len(mod_maps)):
-                    PRINT(f'\t- FIT_{mod_maps[i]}.nii.gz', end=' ')
+                    PRINT(f'\t- fit_{mod_maps[i]}.nii.gz', end=' ')
                     niiMAP_img = self.RESULTS['MAPs_mod'][:,:,:,i]
                     niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
                     niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
@@ -575,7 +579,7 @@ class Evaluation :
                     niiMAP_hdr['cal_max'] = niiMAP_img.max()
                     niiMAP_hdr['scl_slope'] = 1
                     niiMAP_hdr['scl_inter'] = 0
-                    nibabel.save( niiMAP, pjoin(RESULTS_path, f'FIT_{mod_maps[i]}.nii.gz' ) )
+                    nibabel.save( niiMAP, pjoin(RESULTS_path, f'fit_{mod_maps[i]}.nii.gz' ) )
                     PRINT(' [OK]')
             else:
                 WARNING(f'"doSaveModulatedMaps" option not supported for "{self.model.name}" model')
