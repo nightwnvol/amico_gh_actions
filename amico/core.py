@@ -22,7 +22,6 @@ from joblib import cpu_count
 from threadpoolctl import ThreadpoolController
 from tqdm import tqdm
 
-
 def setup( lmax=12, ndirs=None ) :
     """General setup/initialization of the AMICO framework.
 
@@ -86,7 +85,9 @@ class Evaluation :
         self.set_config('peaks_filename', None)
         self.set_config('doNormalizeSignal', True)
         self.set_config('doKeepb0Intact', False)        # does change b0 images in the predicted signal
+        self.set_config('doComputeRMSE', False)
         self.set_config('doComputeNRMSE', False)
+        self.set_config('doSaveModulatedMaps', False)
         self.set_config('doSaveCorrectedDWI', False)
         self.set_config('doMergeB0', False)             # Merge b0 volumes
         self.set_config('doDebiasSignal', False)        # Flag to remove Rician bias
@@ -119,7 +120,6 @@ class Evaluation :
         b0_thr : float
             The threshold below which a b-value is considered a b0 (default : 0)
         """
-
         # Loading data, acquisition scheme and mask (optional)
         LOG( '\n-> Loading data:' )
         tic = time.time()
@@ -411,7 +411,6 @@ class Evaluation :
         if not self.get_config('doDirectionalAverage') and DTI is not None:
             with Loader(message='Precomputing directions ({0})'.format(self.get_config('DTI_fit_method')), verbose=get_verbose()):
                 self.DIRs = np.squeeze(DTI.fit(self.y).directions)
-
         # call the fit() method of the actual model
         with self._controller.limit(limits=self.get_config('BLAS_threads'), user_api='blas'):
             with Loader(message='Fitting the model', verbose=get_verbose()):
@@ -423,18 +422,25 @@ class Evaluation :
         # store results
         self.RESULTS = {}
         # estimates (maps)
-        self.RESULTS['MAPs']  = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], len(self.model.maps_name)], dtype=np.float32)
+        self.RESULTS['MAPs'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], len(self.model.maps_name)], dtype=np.float32)
         self.RESULTS['MAPs'][self.niiMASK_img==1, :] = results[0]
         # directions
-        self.RESULTS['DIRs']  = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], 3], dtype=np.float32)
+        self.RESULTS['DIRs'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], 3], dtype=np.float32)
         self.RESULTS['DIRs'][self.niiMASK_img==1, :] = self.DIRs
-        # nrmse
+        # fitting error
+        if self.get_config('doComputeRMSE') :
+            self.RESULTS['RMSE'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2]], dtype=np.float32)
+            self.RESULTS['RMSE'][self.niiMASK_img==1] = results[1]
         if self.get_config('doComputeNRMSE') :
             self.RESULTS['NRMSE'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2]], dtype=np.float32)
-            self.RESULTS['NRMSE'][self.niiMASK_img==1] = results[1]
-        # corrected DWI
-        if self.get_config('doSaveCorrectedDWI') :
-            y_corrected = results[2]
+            self.RESULTS['NRMSE'][self.niiMASK_img==1] = results[2]
+        # Modulated NDI and ODI maps (NODDI)
+        if self.model.name == 'NODDI' and self.get_config('doSaveModulatedMaps'):
+            self.RESULTS['MAPs_mod'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], 2], dtype=np.float32)
+            self.RESULTS['MAPs_mod'][self.niiMASK_img==1, :] = results[3]
+        # corrected DWI (Free-Water)
+        if self.model.name == 'Free-Water' and self.get_config('doSaveCorrectedDWI') :
+            y_corrected = results[3]
             if self.get_config('doNormalizeSignal') and self.scheme.b0_count > 0:
                 y_corrected = y_corrected * np.reshape(self.mean_b0s[self.niiMASK_img==1], (-1, 1))
             if self.get_config('doKeepb0Intact') and self.scheme.b0_count > 0:
@@ -462,7 +468,7 @@ class Evaluation :
             if path_suffix :
                 RESULTS_path = RESULTS_path +'_'+ path_suffix
             self.RESULTS['RESULTS_path'] = RESULTS_path
-            LOG( f'\n-> Saving output to "{RESULTS_path}/*":' )
+            LOG( f'\n-> Saving output to "{pjoin(RESULTS_path, "*")}":' )
 
             # delete previous output
             RESULTS_path = pjoin( self.get_config('DATA_path'), RESULTS_path )
@@ -471,7 +477,7 @@ class Evaluation :
             if path_suffix :
                 RESULTS_path = RESULTS_path +'_'+ path_suffix
             self.RESULTS['RESULTS_path'] = RESULTS_path
-            LOG( f'\n-> Saving output to "{RESULTS_path}/*":' )
+            LOG( f'\n-> Saving output to "{pjoin(RESULTS_path, "*")}":' )
 
         if not exists( RESULTS_path ) :
             makedirs( RESULTS_path )
@@ -504,6 +510,17 @@ class Evaluation :
             PRINT(' [OK]')
 
         # fitting error
+        if self.get_config('doComputeRMSE') :
+            PRINT('\t- FIT_rmse.nii.gz', end=' ')
+            niiMAP_img = self.RESULTS['RMSE']
+            niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
+            niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
+            niiMAP_hdr['cal_min'] = 0
+            niiMAP_hdr['cal_max'] = 1
+            niiMAP_hdr['scl_slope'] = 1
+            niiMAP_hdr['scl_inter'] = 0
+            nibabel.save( niiMAP, pjoin(RESULTS_path, 'FIT_rmse.nii.gz') )
+            PRINT(' [OK]')
         if self.get_config('doComputeNRMSE') :
             PRINT('\t- FIT_nrmse.nii.gz', end=' ')
             niiMAP_img = self.RESULTS['NRMSE']
@@ -542,6 +559,26 @@ class Evaluation :
             niiMAP_hdr['scl_inter'] = 0
             nibabel.save( niiMAP, pjoin(RESULTS_path, f'FIT_{self.model.maps_name[i]}.nii.gz' ) )
             PRINT(' [OK]')
+
+        # modulated NDI and ODI maps (NODDI)
+        if self.get_config('doSaveModulatedMaps'):
+            if self.model.name == 'NODDI':
+                mod_maps = [name + '_modulated' for name in self.model.maps_name[:2]]
+                descr = [descr + ' modulated' for descr in self.model.maps_descr[:2]]
+                for i in range(len(mod_maps)):
+                    PRINT(f'\t- FIT_{mod_maps[i]}.nii.gz', end=' ')
+                    niiMAP_img = self.RESULTS['MAPs_mod'][:,:,:,i]
+                    niiMAP     = nibabel.Nifti1Image( niiMAP_img, affine, hdr )
+                    niiMAP_hdr = niiMAP.header if nibabel.__version__ >= '2.0.0' else niiMAP.get_header()
+                    niiMAP_hdr['descrip'] = descr[i] + f' (AMICO v{self.get_config("version")})'
+                    niiMAP_hdr['cal_min'] = niiMAP_img.min()
+                    niiMAP_hdr['cal_max'] = niiMAP_img.max()
+                    niiMAP_hdr['scl_slope'] = 1
+                    niiMAP_hdr['scl_inter'] = 0
+                    nibabel.save( niiMAP, pjoin(RESULTS_path, f'FIT_{mod_maps[i]}.nii.gz' ) )
+                    PRINT(' [OK]')
+            else:
+                WARNING(f'"doSaveModulatedMaps" option not supported for "{self.model.name}" model')
 
         # Directional average signal
         if save_dir_avg:

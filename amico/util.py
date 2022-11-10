@@ -257,10 +257,8 @@ class Loader:
                 self._n = 12
                 self._m = 3
                 for i in range(self._n - self._m + 1 - 2):
-                    # self._steps.append('|{0}{1}{2}|'.format(' ' * i, '█' * self._m, ' ' * (self._n - self._m - i - 2)))
                     self._steps.append(f"|{' ' * i}{'█' * self._m}{' ' * (self._n - self._m - i - 2)}|")
                 for i in range(self._m - 1):
-                    # self._steps.append('|{0}{1}{2}|'.format('█' * (i + 1), ' ' * (self._n - self._m - 2), '█' * (self._m - i - 1)))
                     self._steps.append(f"|{'█' * (i + 1)}{' ' * (self._n - self._m - 2)}{'█' * (self._m - i - 1)}|")
 
         self._done = False
@@ -277,11 +275,9 @@ class Loader:
             for step in itertools.cycle(self._steps):
                 if self._done:
                     break
-                # print('\r\t* {0:{2}}{1}'.format(self.message, step, self.padding), end='')
                 print(f"\r\t* {self.message}  {step}", end='', flush=True)
                 time.sleep(self.timeout)
         if self.verbose == 2:
-            # print('\r\t* {0}'.format(self.message), end='')
             print(f"\t* {self.message}", end='', flush=True)
 
     def start(self):
@@ -290,9 +286,7 @@ class Loader:
     def stop(self):
         self._done = True
         if self.verbose == 3:
-            # print('\r\t  {0}'.format(' ' * (len(self.message) + self._n + self.padding)), end='')
             print(f"\r\t  {' ' * (len(self.message) + 2 + self._n)}", end='', flush=True)
-            # print('\r\t* {0:{2}}{1}'.format(self.message, self.end, self.padding))
             print(f"\r\t* {self.message}  {self.end}")
         if self.verbose == 2:
             print(f"  {self.end}")
