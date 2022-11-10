@@ -27,6 +27,7 @@ archs = ["x86_64"]
 [tool.cibuildwheel.macos]
 environment = {REPAIR_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21", MACOSX_DEPLOYMENT_TARGET="11.0"}
 before-all = [
+    "7z x test/demo.zip -otest/demo", # NOTE move in before-test?
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
