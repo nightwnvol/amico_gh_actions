@@ -25,7 +25,7 @@ if sys.platform.startswith('win32'):
       include_dirs.extend(openblas_include)
       libraries.extend(['libopenblas'])
       library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std:c11'])
+      extra_compile_args.extend(['-std:c++14', '-fp:fast'])
       extra_link_args.extend([])
 if sys.platform.startswith('linux'):
       openblas_include = ['OpenBLAS-0.3.21']
@@ -33,7 +33,7 @@ if sys.platform.startswith('linux'):
       include_dirs.extend(openblas_include)
       libraries.extend(['stdc++', 'openblas'])
       library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std=c++11'])
+      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
       extra_link_args.extend([])
 if sys.platform.startswith('darwin'):
       openblas_include = ['OpenBLAS-0.3.21']
@@ -41,7 +41,7 @@ if sys.platform.startswith('darwin'):
       include_dirs.extend(openblas_include)
       libraries.extend(['stdc++', 'openblas'])
       library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std=c++11'])
+      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
       extra_link_args.extend([])
 
 extensions = [
