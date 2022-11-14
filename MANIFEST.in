@@ -4,9 +4,4 @@ include LICENSE
 include amico/*pyx
 include amico/*pxd
 include amico/*.h
-include nnls/*.h
-include spams/*.h
-include spams/decomp/*.h
-include spams/dictLearn/*.h
-include spams/linalg/*.h
-include spams/prox/*.h
+recursive-include src *.h

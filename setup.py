@@ -7,42 +7,38 @@ sys.path.insert(0, './amico/')
 import info
 
 include_dirs = [
-      'spams',
-      'spams/decomp',
-      'spams/dictLearn',
-      'spams/linalg',
-      'spams/prox',
-      'nnls'
+      'src/spams',
+      'src/spams/decomp',
+      'src/spams/dictLearn',
+      'src/spams/linalg',
+      'src/spams/prox',
+      'src/nnls'
 ]
 libraries = []
 library_dirs = []
 extra_compile_args = []
-extra_link_args = []
+# extra_link_args = []
+
+openblas_dir = 'OpenBLAS-0.3.21'
 
 if sys.platform.startswith('win32'):
-      openblas_include = ['OpenBLAS-0.3.21/include']
-      openblas_lib = ['OpenBLAS-0.3.21/lib']
-      include_dirs.extend(openblas_include)
-      libraries.extend(['libopenblas'])
-      library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std:c++14', '-fp:fast'])
-      extra_link_args.extend([])
+      include_dirs.extend([openblas_dir+'/include'])
+      libraries.extend(['libopenblas']) # .lib filenames
+      library_dirs.extend([openblas_dir+'/lib'])
+      extra_compile_args.extend(['-std:c++14'])
+      # extra_link_args.extend([])
 if sys.platform.startswith('linux'):
-      openblas_include = ['OpenBLAS-0.3.21']
-      openblas_lib = ['OpenBLAS-0.3.21']
-      include_dirs.extend(openblas_include)
-      libraries.extend(['stdc++', 'openblas'])
-      library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
-      extra_link_args.extend([])
+      include_dirs.extend([openblas_dir])
+      libraries.extend(['stdc++', 'openblas']) # library names (not filenames)
+      library_dirs.extend([openblas_dir])
+      extra_compile_args.extend(['-std=c++14'])
+      # extra_link_args.extend([])
 if sys.platform.startswith('darwin'):
-      openblas_include = ['OpenBLAS-0.3.21']
-      openblas_lib = ['OpenBLAS-0.3.21']
-      include_dirs.extend(openblas_include)
-      libraries.extend(['stdc++', 'openblas'])
-      library_dirs.extend(openblas_lib)
-      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
-      extra_link_args.extend([])
+      include_dirs.extend([openblas_dir])
+      libraries.extend(['stdc++', 'openblas']) # library names (not filenames)
+      library_dirs.extend([openblas_dir])
+      extra_compile_args.extend(['-std=c++14'])
+      # extra_link_args.extend([])
 
 extensions = [
       Extension(
@@ -51,8 +47,8 @@ extensions = [
             include_dirs=include_dirs,
             libraries=libraries,
             library_dirs=library_dirs,
-            extra_compile_args=extra_compile_args,
-            extra_link_args=extra_link_args
+            extra_compile_args=extra_compile_args
+            # extra_link_args=extra_link_args
       ),
       Extension(
             'amico.lut',
