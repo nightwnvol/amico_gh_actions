@@ -4,7 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp36, cp37, cp38, cp39, cp310]
+        py: [cp37, cp38, cp39, cp310]
         plat:
           - [ubuntu-20.04, manylinux, x86_64]
           - [windows-2019, win, amd64]
@@ -19,6 +19,15 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: amd64
+      - name: MacOS requirements
+        if: matrix.plat[0] == 'macos-11'
+        run: |
+          brew install gcc
+          brew install p7zip
+          brew install python@3.7
+          brew install python@3.8
+          brew install python@3.9
+          brew install python@3.10
       - name: Build
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
