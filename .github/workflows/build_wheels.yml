@@ -4,11 +4,11 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp38, cp39, cp310]
+        py: [cp36, cp37, cp38, cp39, cp310]
         plat:
           - [ubuntu-20.04, manylinux, x86_64]
           - [windows-2019, win, amd64]
-          # - [macos-11, macosx, x86_64] # .cirrus.yml
+          - [macos-11, macosx, x86_64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
@@ -23,6 +23,9 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
+          CIBW_ARCHS_WINDOWS: "AMD64"
+          CIBW_ARCHS_MACOS: "x86_64"
+          CIBW_ARCHS_LINUX: "x86_64"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

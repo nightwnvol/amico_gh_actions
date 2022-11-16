@@ -4,18 +4,53 @@ build_and_store_wheels: &BUILD_AND_STORE_WHEELS
   wheels_artifacts:
     path: 'wheelhouse/*'
 
-build_macos_cp39_task:
-  name: Build macOS arm64 cp39 wheel
+macos_arm64_cp38_task:
+  name: Build macOS arm64 wheel
   trigger_type: manual
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode # Apple Silicon runner!! (arm64)
+    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
+  env:
+    PATH: $PATH:/opt/homebrew/opt/python@3.8/bin
+    CIBW_BUILD: cp38-macosx_arm64
+    CIBW_ARCHS_MACOS: "arm64"
+  install_pre_requirements_script:
+    - brew install gcc
+    - brew install p7zip
+    - brew install python@3.8
+  install_cibuildwheel_script:
+    - python3.8 -m pip install cibuildwheel==2.11.2
+  <<: *BUILD_AND_STORE_WHEELS
+
+macos_arm64_cp39_task:
+  name: Build macOS arm64 wheel
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
   env:
     PATH: $PATH:/opt/homebrew/opt/python@3.9/bin
     CIBW_BUILD: cp39-macosx_arm64
+    CIBW_ARCHS_MACOS: "arm64"
   install_pre_requirements_script:
     - brew install gcc
     - brew install p7zip
     - brew install python@3.9
   install_cibuildwheel_script:
     - python3.9 -m pip install cibuildwheel==2.11.2
+  <<: *BUILD_AND_STORE_WHEELS
+
+macos_arm64_cp310_task:
+  name: Build macOS arm64 wheel
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
+  env:
+    PATH: $PATH:/opt/homebrew/opt/python@3.10/bin
+    CIBW_BUILD: cp310-macosx_arm64
+    CIBW_ARCHS_MACOS: "arm64"
+  install_pre_requirements_script:
+    - brew install gcc
+    - brew install p7zip
+    - brew install python@3.10
+  install_cibuildwheel_script:
+    - python3.10 -m pip install cibuildwheel==2.11.2
   <<: *BUILD_AND_STORE_WHEELS
