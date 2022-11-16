@@ -20,6 +20,7 @@ jobs:
         with:
           platforms: amd64
       - name: Build
+        continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
