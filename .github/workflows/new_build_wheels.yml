@@ -4,13 +4,13 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp36] #, cp37, cp38, cp39, cp310]
+        py: [cp36, cp37, cp38, cp39, cp310]
         plat:
           - [windows-2019, win_amd64, AMD64]
           - [windows-2019, win32, x86]
-          # - [macos-11, macosx_x86_64, x86_64]
-          # - [ubuntu-20.04, manylinux_x86_64, x86_64]
-          # - [ubuntu-20.04, manylinux_aarch64, aarch64]
+          - [macos-11, macosx_x86_64, x86_64]
+          - [ubuntu-20.04, manylinux_x86_64, x86_64]
+          - [ubuntu-20.04, manylinux_aarch64, aarch64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
