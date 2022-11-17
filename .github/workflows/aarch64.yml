@@ -6,8 +6,8 @@ jobs:
       matrix:
         py: [cp39]
         plat:
-          - [ubuntu-20.04, manylinux, x86_64]
-          - [ubuntu-20.04, manylinux, aarch64]
+          - [ubuntu-20.04, manylinux, x86_64, amd64]
+          - [ubuntu-20.04, manylinux, aarch64, arm64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
@@ -17,7 +17,7 @@ jobs:
         if: matrix.plat[0] == 'ubuntu-20.04'
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: amd64, arm64
+          platforms: ${{ matrix.plat[3] }}
       - name: Build
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
