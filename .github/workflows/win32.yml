@@ -27,7 +27,7 @@ jobs:
           CIBW_ARCHS_WINDOWS: AMD64 x86
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -otest/demo &&
-            7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\"
+            7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
       - name: Build x86
         if: matrix.plat[1] == 'win32'
         continue-on-error: true
