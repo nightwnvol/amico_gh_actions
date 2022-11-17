@@ -24,6 +24,14 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
           CIBW_ARCHS_WINDOWS: AMD64 x86
+          if: matrix.plat[1] == 'win_amd64'
+          CIBW_BEFORE_ALL_WINDOWS: >
+            7z x test/demo.zip -otest/demo &&
+            7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\"
+          if: matrix.plat[1] == 'win32'
+          CIBW_BEFORE_ALL_WINDOWS: >
+            7z x test/demo.zip -otest/demo &&
+            7z x OpenBLAS-0.3.21-x86.zip -o\"OpenBLAS-0.3.21\"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
