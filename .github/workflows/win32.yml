@@ -1,4 +1,4 @@
-name: aarch64
+name: win32
 on: workflow_dispatch
 jobs:
   build_wheels:
@@ -6,8 +6,8 @@ jobs:
       matrix:
         py: [cp39]
         plat:
-          - [ubuntu-20.04, manylinux, x86_64, amd64]
-          - [ubuntu-20.04, manylinux, aarch64, arm64]
+          - [windows-2019, win_amd64]
+          - [windows-2019, win32]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
@@ -22,8 +22,8 @@ jobs:
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
-          CIBW_ARCHS_LINUX: "x86_64 aarch64"
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
+          CIBW_ARCHS_WINDOWS: AMD64 x86
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

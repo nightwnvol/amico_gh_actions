@@ -6,27 +6,28 @@ jobs:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         plat:
-          - [ubuntu-20.04, manylinux, x86_64]
-          - [windows-2019, win, amd64]
-          - [macos-11, macosx, x86_64]
+          - [ubuntu-20.04, manylinux_x86_64]
+          - [ubuntu-20.04, manylinux_aarch64]
+          - [windows-2019, win_amd64]
+          - [macos-11, macosx_x86_64]
     name: Build wheels
     runs-on: ${{ matrix.plat[0] }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up QEMU
-        if: matrix.plat[0] == 'ubuntu-20.04'
+        if: matrix.plat[0] == 'ubuntu-20.04' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: amd64
+          platforms: all
       - name: Build
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}_${{ matrix.plat[2] }}
-          CIBW_ARCHS_WINDOWS: "AMD64"
-          CIBW_ARCHS_MACOS: "x86_64"
-          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
+          CIBW_ARCHS_WINDOWS: AMD64
+          CIBW_ARCHS_MACOS: x86_64
+          CIBW_ARCHS_LINUX: x86_64 aarch64
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
