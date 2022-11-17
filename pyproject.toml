@@ -7,10 +7,10 @@ test-command = "python {project}/test/noddi.py"
 build-verbosity = 3
 
 [tool.cibuildwheel.windows]
-before-all = [
-    "7z x test/demo.zip -otest/demo", # NOTE move in before-test?
-    "7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\""
-]
+# before-all = [
+#     "7z x test/demo.zip -otest/demo", # NOTE move in before-test?
+#     "7z x OpenBLAS-0.3.21-x64.zip -o\"OpenBLAS-0.3.21\""
+# ]
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair --add-path OpenBLAS-0.3.21\\bin -w {dest_dir} {wheel}"
 
