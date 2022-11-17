@@ -38,6 +38,7 @@ jobs:
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -otest/demo &&
             7z x OpenBLAS-0.3.21-x86.zip -oOpenBLAS-0.3.21
+          CIBW_TEST_SKIP: "*-win32" # NOTE cannot test because there is no scipy win32 wheel
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
