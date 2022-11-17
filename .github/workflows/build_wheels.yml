@@ -4,7 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp37, cp38, cp39, cp310]
+        py: [cp36, cp37, cp38, cp39, cp310]
         plat:
           - [ubuntu-20.04, manylinux, x86_64]
           - [windows-2019, win, amd64]
@@ -19,15 +19,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: amd64
-      - name: MacOS requirements
-        if: matrix.plat[0] == 'macos-11'
-        run: |
-          brew install gcc
-          brew install p7zip
-          brew install python@3.7
-          brew install python@3.8
-          brew install python@3.9
-          brew install python@3.10
       - name: Build
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
@@ -36,6 +27,7 @@ jobs:
           CIBW_ARCHS_WINDOWS: "AMD64"
           CIBW_ARCHS_MACOS: "x86_64"
           CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

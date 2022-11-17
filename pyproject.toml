@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 test-command = "python {project}/test/noddi.py"
+test-skip = "cp38-macosx_*:arm64"
 build-verbosity = 3
 
 [tool.cibuildwheel.windows]
@@ -15,7 +16,7 @@ before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair --add-path OpenBLAS-0.3.21\\bin -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
-environment = {REPAIR_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21", MACOSX_DEPLOYMENT_TARGET="11.0"}
+environment = {REPAIR_LIBRARY_PATH="$(pwd)/OpenBLAS-0.3.21"}
 before-all = [
     "7z x test/demo.zip -otest/demo", # NOTE move in before-test?
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
