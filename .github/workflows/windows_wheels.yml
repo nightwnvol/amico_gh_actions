@@ -1,0 +1,49 @@
+name: Windows wheels
+on: workflow_dispatch
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        py: [cp36, cp37, cp38, cp39, cp310]
+        plat:
+          - [windows-2019, win_amd64, AMD64]
+          - [windows-2019, win32, x86]
+    name: Build wheels
+    runs-on: ${{ matrix.plat[0] }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU (Linux)
+        if: matrix.plat[0] == 'ubuntu-20.04' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+      
+      - name: Set up OpenBLAS (Windows x64)
+        if: matrix.plat[1] == 'win_amd64'
+        run: 7z x OpenBLAS-0.3.21-x64.zip -oOpenBLAS-0.3.21
+      
+      - name: Set up OpenBLAS (Windows x86)
+        if: matrix.plat[1] == 'win32'
+        run: 7z x OpenBLAS-0.3.21-x86.zip -oOpenBLAS-0.3.21
+      
+      - name: Set up OpenBLAS (MacOS and Linux)
+        if: matrix.plat[0] == 'macos-11' || matrix.plat[0] == 'ubuntu-20.04'
+        run: |
+          tar -xzf OpenBLAS-0.3.21.tar.gz
+          make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1
+      
+      - name: Build wheel (cibuildwheel)
+        continue-on-error: true
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
+          CIBW_ARCHS: ${{ matrix.plat[2] }}
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
+          CIBW_TEST_SKIP: "*-win32"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
