@@ -25,11 +25,13 @@ jobs:
       
       - name: Set up OpenBLAS (Windows x64)
         if: matrix.plat[1] == 'win_amd64'
-        run: 7z x OpenBLAS-0.3.21-x64.zip -oOpenBLAS-0.3.21
+        run: |
+          7z x OpenBLAS-0.3.21-x64.zip -oOpenBLAS-0.3.21
       
       - name: Set up OpenBLAS (Windows x86)
         if: matrix.plat[1] == 'win32'
-        run: 7z x OpenBLAS-0.3.21-x86.zip -oOpenBLAS-0.3.21
+        run: |
+          7z x OpenBLAS-0.3.21-x86.zip -oOpenBLAS-0.3.21
       
       - name: Set up OpenBLAS (MacOS and Linux)
         if: matrix.plat[0] == 'macos-11' || matrix.plat[0] == 'ubuntu-20.04'
