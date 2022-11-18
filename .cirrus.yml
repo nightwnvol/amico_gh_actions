@@ -20,6 +20,8 @@ linux_arm64_cp39_task:
   env:
     CIBW_BUILD: cp39-manylinux_aarch64
     CIBW_ARCHS_LINUX: aarch64
+  install_pre_requirements_script:
+    - apt install -y python3.9-venv
   install_cibuildwheel_script:
     - python3.9 -m pip install cibuildwheel==2.11.2
   <<: *BUILD_AND_STORE_WHEELS_LINUX
