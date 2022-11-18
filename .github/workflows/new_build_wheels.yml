@@ -23,22 +23,6 @@ jobs:
         with:
           platforms: all
       
-      - name: Set up OpenBLAS (Windows x64)
-        if: matrix.plat[1] == 'win_amd64'
-        run: |
-          7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
-      
-      - name: Set up OpenBLAS (Windows x86)
-        if: matrix.plat[1] == 'win32'
-        run: |
-          7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
-      
-      - name: Set up OpenBLAS (MacOS and Linux)
-        if: matrix.plat[0] == 'macos-11' || matrix.plat[0] == 'ubuntu-20.04'
-        run: |
-          tar -xzf OpenBLAS-0.3.21.tar.gz
-          make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1
-      
       - name: Build wheel (cibuildwheel)
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
@@ -47,8 +31,6 @@ jobs:
           CIBW_ARCHS_WINDOWS: AMD64 x86
           CIBW_ARCHS_MACOS: x86_64
           CIBW_ARCHS_LINUX: x86_64 aarch64
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
-          CIBW_TEST_SKIP: "*-win32"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
