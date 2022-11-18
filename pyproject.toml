@@ -21,4 +21,3 @@ before-test = "7z x test/demo.zip -otest/demo"
 
 [tool.cibuildwheel.linux]
 repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 auditwheel repair -w {dest_dir} {wheel}"
-before-test = "unzip test/demo.zip -d test/demo"

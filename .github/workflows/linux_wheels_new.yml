@@ -1,28 +1,30 @@
-name: Windows wheels new
+name: Linux wheels new
 on: workflow_dispatch
 jobs:
   build_wheels:
     strategy:
       matrix:
         arch:
-          - [AMD64, win_amd64]
-          - [x86, win32]
+          - [x86_64, manylinux_x86_64, amd64, HASWELL]
+          - [aarch64, manylinux_aarch64, arm64, ARMV8]
     name: Build wheels
-    runs-on: windows-2019
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up OpenBLAS (AMD64)
-        if: matrix.arch[0] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        run: 7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: ${{ matrix.arch[2] }}
 
-      - name: Set up OpenBLAS (x86)
-        if: matrix.arch[0] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        run: 7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
+      - name: Set up OpenBLAS (${{ matrix.arch[0] }})
+        run: |
+          tar -xzf OpenBLAS-0.3.21.tar.gz
+          make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
 
       - name: Set up test
-        run: 7z x test/demo.zip -otest/demo
+        run: unzip test/demo.zip -d test/demo
 
       - name: Build wheels (${{ matrix.arch[0] }})
         # continue-on-error: true
