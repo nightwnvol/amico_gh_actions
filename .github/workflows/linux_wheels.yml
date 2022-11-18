@@ -4,7 +4,8 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp36, cp37, cp38, cp39, cp310]
+        # py: [cp36, cp37, cp38, cp39, cp310]
+        py: [cp39]
         plat:
           - [manylinux_x86_64, x86_64]
           - [manylinux_aarch64, aarch64]
@@ -14,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up QEMU (Linux)
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
           platforms: all
