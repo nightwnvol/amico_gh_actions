@@ -18,9 +18,10 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: all
+      
+      - name: Test QEMU
         run: |
           qemu-system-x86_64 -h
-      
       # - name: Build wheels (${{ matrix.plat[1] }})
       #   uses: pypa/cibuildwheel@v2.11.2
       #   env:
