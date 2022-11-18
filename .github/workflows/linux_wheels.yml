@@ -19,12 +19,27 @@ jobs:
         with:
           platforms: all
       
-      - name: Build wheels (${{ matrix.plat[1] }})
+      - name: Build wheels (x86_64)
+        if: matrix.plat[1] == 'x86_64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
           CIBW_ARCHS_LINUX: ${{ matrix.plat[1] }}
+          CIBW_BEFORE_ALL_LINUX: >
+            tar -xzf OpenBLAS-0.3.21.tar.gz &&
+            make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1
+
+      - name: Build wheels (aarch64)
+        if: matrix.plat[1] == 'aarch64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        continue-on-error: true
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
+          CIBW_ARCHS_LINUX: ${{ matrix.plat[1] }}
+          CIBW_BEFORE_ALL_LINUX: >
+            tar -xzf OpenBLAS-0.3.21.tar.gz &&
+            make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
