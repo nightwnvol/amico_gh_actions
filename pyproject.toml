@@ -27,5 +27,5 @@ before-all = [
     "make -C OpenBLAS-0.3.21 clean",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
-repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 auditwheel repair -w {dest_dir} -v {wheel}"
+repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 auditwheel repair -w {dest_dir} {wheel}"
 before-test = "unzip test/demo.zip -d test/demo"
