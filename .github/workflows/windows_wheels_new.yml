@@ -4,33 +4,33 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        arch: [AMD64, x86]
+        arch:
+          - [AMD64, win_amd64]
+          - [x86, win32]
     name: Build wheels
     runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build wheels (AMD64)
+      - name: Set up OpenBLAS (AMD64)
         if: matrix.arch == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        continue-on-error: true
-        uses: pypa/cibuildwheel@v2.11.2
-        env:
-          CIBW_BUILD: cp36-win_amd64 cp37-win_amd64 cp38-win_amd64 cp39-win_amd64 cp310-win_amd64
-          CIBW_ARCHS_WINDOWS: ${{ matrix.arch }}
-          CIBW_BEFORE_ALL_WINDOWS: >
-            7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
+        run: 7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
 
-      - name: Build wheels (x86)
+      - name: Set up OpenBLAS (x86)
         if: matrix.arch == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        run: 7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
+
+      - name: Set up test
+        run: 7z x test/demo.zip -otest/demo
+
+      - name: Build wheels (${{ matrix.arch[0] }})
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: cp36-win32 cp37-win32 cp38-win32 cp39-win32 cp310-win32
-          CIBW_ARCHS_WINDOWS: ${{ matrix.arch }}
-          CIBW_BEFORE_ALL_WINDOWS: >
-            7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
-      
+          CIBW_BUILD: cp36-${{ matrix.arch[1] }} cp37-${{ matrix.arch[1] }} cp38-${{ matrix.arch[1] }} cp39-${{ matrix.arch[1] }} cp310-${{ matrix.arch[1] }}
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
+          
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
