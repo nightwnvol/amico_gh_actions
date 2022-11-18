@@ -15,7 +15,6 @@ before-test = "7z x test/demo.zip -otest/demo"
 [tool.cibuildwheel.macos]
 before-all = [
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
-    "make -C OpenBLAS-0.3.21 clean",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
 repair-wheel-command = "DYLD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
@@ -24,7 +23,6 @@ before-test = "7z x test/demo.zip -otest/demo"
 [tool.cibuildwheel.linux]
 before-all = [
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
-    "make -C OpenBLAS-0.3.21 clean",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
 ]
 repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 auditwheel repair -w {dest_dir} {wheel}"

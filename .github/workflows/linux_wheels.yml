@@ -20,7 +20,7 @@ jobs:
           platforms: all
       
       - name: Build wheels (${{ matrix.plat[1] }})
-        # continue-on-error: true
+        continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
