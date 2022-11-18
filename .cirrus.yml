@@ -13,9 +13,12 @@ build_and_store_wheels_linux: &BUILD_AND_STORE_WHEELS_LINUX
 linux_arm64_cp39_task:
   name: Build Linux arm64 wheel
   trigger_type: manual
-  arm_container:
-    image: openjdk:latest
-    cpu: 8
+  compute_engine_instance:
+    image_project: cirrus-images
+    image: family/docker-builder-arm64
+    architecture: arm64
+    platform: linux
+    cpu: 4
     memory: 16G
   env:
     CIBW_BUILD: cp39-manylinux_aarch64
