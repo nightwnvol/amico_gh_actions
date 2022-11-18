@@ -1,0 +1,27 @@
+name: MacOS wheels
+on: workflow_dispatch
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        py: [cp36, cp37, cp38, cp39, cp310]
+        plat:
+          - [macos-11, macosx_x86_64, x86_64]
+    name: Build wheels
+    runs-on: ${{ matrix.plat[0] }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build wheels (${{ matrix.plat[2] }}) # NOTE arm64 in .cirrus.yml
+        continue-on-error: true
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
+          CIBW_ARCHS_MACOS: ${{ matrix.plat[2] }}
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
