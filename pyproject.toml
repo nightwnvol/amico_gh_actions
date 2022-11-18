@@ -13,7 +13,7 @@ repair-wheel-command = "delvewheel repair --add-path OpenBLAS-0.3.21\\bin -w {de
 before-test = "7z x test/demo.zip -otest/demo"
 
 [tool.cibuildwheel.macos]
-environment = "REPAIR_LIBRARY_PATH='$(pwd)/OpenBLAS-0.3.21'"
+environment = "REPAIR_LIBRARY_PATH=\"$(pwd)/OpenBLAS-0.3.21\""
 before-all = [
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
@@ -22,7 +22,7 @@ repair-wheel-command = "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --
 before-test = "7z x test/demo.zip -otest/demo"
 
 [tool.cibuildwheel.linux]
-environment = "LD_LIBRARY_PATH='$(pwd)/OpenBLAS-0.3.21'"
+environment = "LD_LIBRARY_PATH=\"$(pwd)/OpenBLAS-0.3.21\""
 before-all = [
     "tar -xzf OpenBLAS-0.3.21.tar.gz",
     "make -C OpenBLAS-0.3.21 DYNAMIC_ARCH=1"
