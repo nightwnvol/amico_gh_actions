@@ -25,7 +25,7 @@ jobs:
         run: 7z x test/demo.zip -otest/demo
 
       - name: Build wheels (${{ matrix.arch[0] }})
-        continue-on-error: true
+        # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           # CIBW_BUILD: cp36-${{ matrix.arch[1] }} cp37-${{ matrix.arch[1] }} cp38-${{ matrix.arch[1] }} cp39-${{ matrix.arch[1] }} cp310-${{ matrix.arch[1] }}
