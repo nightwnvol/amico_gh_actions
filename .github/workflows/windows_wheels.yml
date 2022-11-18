@@ -16,7 +16,7 @@ jobs:
       
       - name: Build wheels (AMD64)
         if: matrix.plat[1] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        continue-on-error: true
+        # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
@@ -26,7 +26,7 @@ jobs:
 
       - name: Build wheels (x86)
         if: matrix.plat[1] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        continue-on-error: true
+        # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}

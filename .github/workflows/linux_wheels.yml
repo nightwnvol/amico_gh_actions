@@ -4,8 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        # py: [cp36, cp37, cp38, cp39, cp310]
-        py: [cp39]
+        py: [cp36, cp37, cp38, cp39, cp310]
         plat:
           - [manylinux_x86_64, x86_64]
           - [manylinux_aarch64, aarch64]
