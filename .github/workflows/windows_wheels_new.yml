@@ -1,0 +1,37 @@
+name: Windows wheels new
+on: workflow_dispatch
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        arch: [AMD64, x86]
+    name: Build wheels
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build wheels (AMD64)
+        if: matrix.arch[0] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        continue-on-error: true
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: cp36-win_amd64 cp37-win_amd64 cp38-win_amd64 cp39-win_amd64 cp310-win_amd64
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
+          CIBW_BEFORE_ALL_WINDOWS: >
+            7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
+
+      - name: Build wheels (x86)
+        if: matrix.arch[0] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        continue-on-error: true
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: cp36-win32 cp37-win32 cp38-win32 cp39-win32 cp310-win32
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
+          CIBW_BEFORE_ALL_WINDOWS: >
+            7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
