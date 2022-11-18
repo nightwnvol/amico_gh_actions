@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Build wheels (${{ matrix.plat[2] }})
+      - name: Build wheels (AMD64)
         if: matrix.plat[2] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
@@ -24,7 +24,7 @@ jobs:
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
 
-      - name: Build wheels (${{ matrix.plat[2] }})
+      - name: Build wheels (x86)
         if: matrix.plat[2] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
