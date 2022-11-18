@@ -1,7 +1,7 @@
 name: Test QEMU
 on: workflow_dispatch
 jobs:
-  build_wheels:
+  test:
     strategy:
       matrix:
         py: [cp39]
