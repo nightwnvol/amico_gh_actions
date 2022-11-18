@@ -6,31 +6,31 @@ jobs:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         plat:
-          - [windows-2019, win_amd64, AMD64]
-          - [windows-2019, win32, x86]
+          - [win_amd64, AMD64]
+          - [win32, x86]
     name: Build wheels
-    runs-on: ${{ matrix.plat[0] }}
+    runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       
       - name: Build wheels (AMD64)
-        if: matrix.plat[2] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        if: matrix.plat[1] == 'AMD64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
-          CIBW_ARCHS_WINDOWS: ${{ matrix.plat[2] }}
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
+          CIBW_ARCHS_WINDOWS: ${{ matrix.plat[1] }}
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x OpenBLAS-0.3.21-x64.zip -o"OpenBLAS-0.3.21"
 
       - name: Build wheels (x86)
-        if: matrix.plat[2] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
+        if: matrix.plat[1] == 'x86' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
         continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
-          CIBW_ARCHS_WINDOWS: ${{ matrix.plat[2] }}
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
+          CIBW_ARCHS_WINDOWS: ${{ matrix.plat[1] }}
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x OpenBLAS-0.3.21-x86.zip -o"OpenBLAS-0.3.21"
       

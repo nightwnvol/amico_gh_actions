@@ -6,10 +6,10 @@ jobs:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         plat:
-          - [ubuntu-20.04, manylinux_x86_64, x86_64]
-          - [ubuntu-20.04, manylinux_aarch64, aarch64]
+          - [manylinux_x86_64, x86_64]
+          - [manylinux_aarch64, aarch64]
     name: Build wheels
-    runs-on: ${{ matrix.plat[0] }}
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -19,12 +19,12 @@ jobs:
         with:
           platforms: all
       
-      - name: Build wheels (${{ matrix.plat[2] }})
-        continue-on-error: true
+      - name: Build wheels (${{ matrix.plat[1] }})
+        # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[1] }}
-          CIBW_ARCHS_LINUX: ${{ matrix.plat[2] }}
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
+          CIBW_ARCHS_LINUX: ${{ matrix.plat[1] }}
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
