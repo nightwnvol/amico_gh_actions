@@ -4,6 +4,26 @@ build_and_store_wheels: &BUILD_AND_STORE_WHEELS
   wheels_artifacts:
     path: 'wheelhouse/*'
 
+build_and_store_wheels_linux: &BUILD_AND_STORE_WHEELS_LINUX
+  run_cibuildwheel_script:
+    - cibuildwheel --platform linux
+  wheels_artifacts:
+    path: 'wheelhouse/*'
+
+linux_arm64_cp39_task:
+  name: Build Linux arm64 wheel
+  trigger_type: manual
+  arm_container:
+    image: openjdk:latest
+    cpu: 8
+    memory: 16G
+  env:
+    CIBW_BUILD: cp39-manylinux_aarch64
+    CIBW_ARCHS_LINUX: aarch64
+  install_cibuildwheel_script:
+    - python3.9 -m pip install cibuildwheel==2.11.2
+  <<: *BUILD_AND_STORE_WHEELS_LINUX
+
 macos_arm64_cp38_task:
   name: Build macOS arm64 wheel
   trigger_type: manual
