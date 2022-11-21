@@ -18,13 +18,13 @@ jobs:
         with:
           platforms: ${{ matrix.arch[2] }}
 
-      - name: Set up OpenBLAS (${{ matrix.arch[0] }})
-        run: |
-          tar -xzf OpenBLAS-0.3.21.tar.gz
-          make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
+      # - name: Set up OpenBLAS (${{ matrix.arch[0] }})
+      #   run: |
+      #     tar -xzf OpenBLAS-0.3.21.tar.gz
+      #     make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
 
-      - name: Set up test
-        run: unzip test/demo.zip -d test/demo
+      # - name: Set up test
+      #   run: unzip test/demo.zip -d test/demo
 
       - name: Build wheels (${{ matrix.arch[0] }})
         # continue-on-error: true
@@ -32,7 +32,11 @@ jobs:
         env:
           # CIBW_BUILD: cp36-${{ matrix.arch[1] }} cp37-${{ matrix.arch[1] }} cp38-${{ matrix.arch[1] }} cp39-${{ matrix.arch[1] }} cp310-${{ matrix.arch[1] }}
           CIBW_BUILD: "{cp36,cp37,cp38,cp39,cp310}-${{ matrix.arch[1] }}"
-          CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
+          CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
+          CIBW_BEFORE_ALL_LINUX: >
+            unzip test/demo.zip -d test/demo &&
+            tar -xzf OpenBLAS-0.3.21.tar.gz &&
+            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
