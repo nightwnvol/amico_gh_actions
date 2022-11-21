@@ -14,6 +14,10 @@ macos_arm64_cp38_task:
     CIBW_BUILD: cp38-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
+    CIBW_BEFORE_ALL_MACOS: >
+      7z x test/demo.zip -o"test/demo" &&
+      tar -xzf OpenBLAS-0.3.21.tar.gz &&
+      make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
   install_pre_requirements_script:
     - brew install p7zip
     - brew install python@3.8
@@ -31,6 +35,10 @@ macos_arm64_cp39_task:
     CIBW_BUILD: cp39-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
+    CIBW_BEFORE_ALL_MACOS: >
+      7z x test/demo.zip -o"test/demo" &&
+      tar -xzf OpenBLAS-0.3.21.tar.gz &&
+      make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
   install_pre_requirements_script:
     - brew install p7zip
     - brew install python@3.9
@@ -48,6 +56,10 @@ macos_arm64_cp310_task:
     CIBW_BUILD: cp310-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
+    CIBW_BEFORE_ALL_MACOS: >
+      7z x test/demo.zip -o"test/demo" &&
+      tar -xzf OpenBLAS-0.3.21.tar.gz &&
+      make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
   install_pre_requirements_script:
     - brew install p7zip
     - brew install python@3.10
