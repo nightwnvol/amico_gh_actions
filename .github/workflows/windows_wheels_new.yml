@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
       - name: Build wheels (${{ matrix.arch[0] }})
         # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: "{cp36,cp37,cp38,cp39,cp310}"-${{ matrix.arch[1] }}
+          CIBW_BUILD: "{cp36,cp37,cp38,cp39,cp310}-${{ matrix.arch[1] }}"
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
