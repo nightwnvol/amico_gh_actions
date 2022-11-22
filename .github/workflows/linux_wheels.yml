@@ -5,10 +5,10 @@ jobs:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
-        plat:
-          - [manylinux_x86_64, x86_64]
-          - [manylinux_aarch64, aarch64]
-    name: Build wheels
+        arch:
+          - [x86_64, manylinux_x86_64, amd64, HASWELL]
+          - [aarch64, manylinux_aarch64, arm64, ARMV8]
+    name: Build wheel
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -17,29 +17,19 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: all
-      
-      - name: Build wheels (x86_64)
-        if: matrix.plat[1] == 'x86_64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        continue-on-error: true
-        uses: pypa/cibuildwheel@v2.11.2
-        env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
-          CIBW_ARCHS_LINUX: ${{ matrix.plat[1] }}
-          CIBW_BEFORE_ALL_LINUX: >
-            tar -xzf OpenBLAS-0.3.21.tar.gz &&
-            make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1
+          platforms: ${{ matrix.arch[2] }}
 
-      - name: Build wheels (aarch64)
-        if: matrix.plat[1] == 'aarch64' # NOTE when you use expressions in an if conditional, you may omit the expression syntax ${{ }}
-        continue-on-error: true
+      - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
+        # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.plat[0] }}
-          CIBW_ARCHS_LINUX: ${{ matrix.plat[1] }}
+          CIBW_PLATFORM: linux
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
+          CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
           CIBW_BEFORE_ALL_LINUX: >
+            unzip test/demo.zip -d test/demo &&
             tar -xzf OpenBLAS-0.3.21.tar.gz &&
-            make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
+            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3

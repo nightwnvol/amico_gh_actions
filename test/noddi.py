@@ -2,13 +2,9 @@ from os.path import join as pjoin
 import pathlib
 import amico
 
-# version
 ver = amico.__version__
-# verbose
 amico.set_verbose(2)
-# kernels
-regenerate = True
-print('\033[92m' + f'Running AMICO v{amico.__version__}' + '\033[0m')
+print('\033[92m' + f'Running AMICO v{ver}' + '\033[0m')
 sub = 'demo'
 bval = 'NODDI_protocol.bval'
 bvec = 'NODDI_protocol.bvec'
@@ -17,8 +13,8 @@ b_step = 1
 dwi = 'NODDI_DWI.img'
 mask = 'brain_mask.img'
 b0_thr = 0
+regenerate = True
 ndirs = 500
-# paths
 study_path = pjoin(pathlib.Path(__file__).parent.resolve())
 out_path = pjoin(pathlib.Path(__file__).parent.resolve(), 'res_' + ver, sub)
 amico.setup()

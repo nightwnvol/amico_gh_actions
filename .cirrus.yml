@@ -1,6 +1,6 @@
-build_and_store_wheels: &BUILD_AND_STORE_WHEELS
+build_and_store_wheels: &BUILD_AND_STORE_WHEEL
   run_cibuildwheel_script:
-    - cibuildwheel --platform macos
+    - cibuildwheel
   wheels_artifacts:
     path: 'wheelhouse/*'
 
@@ -8,9 +8,10 @@ macos_arm64_cp38_task:
   name: Build macOS arm64 wheel
   trigger_type: manual
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     PATH: $PATH:/opt/homebrew/opt/python@3.8/bin
+    CIBW_PLATFORM: macos
     CIBW_BUILD: cp38-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
@@ -23,15 +24,16 @@ macos_arm64_cp38_task:
     - brew install python@3.8
   install_cibuildwheel_script:
     - python3.8 -m pip install cibuildwheel==2.11.2
-  <<: *BUILD_AND_STORE_WHEELS
+  <<: *BUILD_AND_STORE_WHEEL
 
 macos_arm64_cp39_task:
   name: Build macOS arm64 wheel
   trigger_type: manual
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     PATH: $PATH:/opt/homebrew/opt/python@3.9/bin
+    CIBW_PLATFORM: macos
     CIBW_BUILD: cp39-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
@@ -44,15 +46,16 @@ macos_arm64_cp39_task:
     - brew install python@3.9
   install_cibuildwheel_script:
     - python3.9 -m pip install cibuildwheel==2.11.2
-  <<: *BUILD_AND_STORE_WHEELS
+  <<: *BUILD_AND_STORE_WHEEL
 
 macos_arm64_cp310_task:
   name: Build macOS arm64 wheel
   trigger_type: manual
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode # NOTE Apple Silicon runner!! (arm64)
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     PATH: $PATH:/opt/homebrew/opt/python@3.10/bin
+    CIBW_PLATFORM: macos
     CIBW_BUILD: cp310-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
@@ -65,4 +68,4 @@ macos_arm64_cp310_task:
     - brew install python@3.10
   install_cibuildwheel_script:
     - python3.10 -m pip install cibuildwheel==2.11.2
-  <<: *BUILD_AND_STORE_WHEELS
+  <<: *BUILD_AND_STORE_WHEEL
