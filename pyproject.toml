@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 test-command = "python {project}/test/noddi.py"
-test-skip = "*-win32 cp38-macosx_arm64"
+test-skip = "*-win32 cp38-macosx_arm64 cp36-manylinux_aarch64"
 build-verbosity = 3
 
 [tool.cibuildwheel.windows]
