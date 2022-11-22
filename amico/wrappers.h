@@ -1,5 +1,5 @@
 /*
-Wrappers for NNLS and LASSO (SPAMS) functions
+Wrappers (interfaces?) for NNLS and LASSO (SPAMS) functions
 */
 
 #ifndef WRAPPERS_H
@@ -14,6 +14,7 @@ Wrappers for NNLS and LASSO (SPAMS) functions
 
 // OUTPUT
 // x = (n)      Solution vector
+// rnorm        Euclidean norm of the final residual vector
 void nnls(const double *A, const double *y, const int m, const int n, double *x, double &rnorm)
 {
     // NOTE work on a copy of 'A' and 'y' because the '_nnls()' call will modify them
@@ -23,6 +24,7 @@ void nnls(const double *A, const double *y, const int m, const int n, double *x,
     std::copy(y, y + m, _y);
 
     _nnls(_A, _y, m, n, x, rnorm);
+    // NOTE throw exceptions
     // if (ret == 1)
     //     std::cout << "WARNING: NNLS max iterations exceeded" << std::endl;
     // if (ret == 2)

@@ -7,12 +7,12 @@ sys.path.insert(0, './amico/')
 import info
 
 include_dirs = [
-      'src/spams',
-      'src/spams/decomp',
-      'src/spams/dictLearn',
-      'src/spams/linalg',
-      'src/spams/prox',
-      'src/nnls'
+      'include/spams',
+      'include/spams/decomp',
+      'include/spams/dictLearn',
+      'include/spams/linalg',
+      'include/spams/prox',
+      'include/nnls'
 ]
 libraries = []
 library_dirs = []
@@ -25,7 +25,7 @@ if sys.platform.startswith('win32'):
       include_dirs.extend([openblas_dir+'/include'])
       libraries.extend(['libopenblas']) # .lib filenames
       library_dirs.extend([openblas_dir+'/lib'])
-      extra_compile_args.extend(['-std:c++14'])
+      extra_compile_args.extend(['/std:c++14'])
       # extra_link_args.extend([])
 if sys.platform.startswith('linux'):
       include_dirs.extend([openblas_dir])
