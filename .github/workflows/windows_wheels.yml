@@ -14,6 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Download OpenBLAS
+        run: gh release download --repo xianyi/OpenBLAS v0.3.21
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
