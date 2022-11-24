@@ -39,6 +39,7 @@ macos_arm64_cp39_task:
     CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0"
     CIBW_BEFORE_ALL_MACOS: >
       7z x test/demo.zip -o"test/demo" &&
+      curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
       tar -xzf OpenBLAS-0.3.21.tar.gz &&
       make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
   install_pre_requirements_script:
