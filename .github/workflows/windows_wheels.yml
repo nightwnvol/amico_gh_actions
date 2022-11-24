@@ -14,11 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download OpenBLAS
-        run: gh release download --repo xianyi/OpenBLAS v0.3.21
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
-
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true
         uses: pypa/cibuildwheel@v2.11.2
@@ -28,7 +23,8 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
-            7z x OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip -o"OpenBLAS-0.3.21"
+            curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip &&
+            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS-0.3.21"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
