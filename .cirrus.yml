@@ -12,10 +12,10 @@ test_task:
   matrix:
     - env:
         PY: "3.8"
-        PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
     - env:
         PY: "3.9"
-        PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
+  env:
+    PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
   install_pre_requirements_script:
     - brew install python@${PY}
     - ln -s python3 /opt/homebrew/opt/python@${PY}/bin/python
