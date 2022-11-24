@@ -4,6 +4,20 @@ build_and_store_wheels: &BUILD_AND_STORE_WHEEL
   wheels_artifacts:
     path: 'wheelhouse/*'
 
+test_task:
+  name: test
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
+  env:
+    PATH: $PATH:/opt/homebrew/opt/python@3.8/bin
+  install_pre_requirements_script:
+    - brew install python@3.8
+    - ln -s python3 /opt/homebrew/opt/python@3.8/bin/python
+  install_cibuildwheel_script:
+    - python -m pip install cibuildwheel==2.11.2
+  <<: *BUILD_AND_STORE_WHEEL
+
 macos_arm64_cp38_task:
   name: Build macOS arm64 wheel
   trigger_type: manual
