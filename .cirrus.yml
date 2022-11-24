@@ -13,9 +13,10 @@ test_task:
     PATH: $PATH:/opt/homebrew/opt/python@3.8/bin
   install_pre_requirements_script:
     - brew install python@3.8
-    - ln -s python /opt/homebrew/opt/python@3.8/bin/python
+    - ln -s python3 /opt/homebrew/opt/python@3.8/bin/python
+    - rehash
   install_cibuildwheel_script:
-    - python -m pip install cibuildwheel==2.11.2
+    - python3 -m pip install cibuildwheel==2.11.2
   <<: *BUILD_AND_STORE_WHEEL
 
 macos_arm64_cp38_task:
