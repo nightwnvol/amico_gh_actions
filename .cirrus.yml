@@ -9,14 +9,18 @@ test_task:
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
-  env:
-    PATH: $PATH:/opt/homebrew/opt/python@3.8/bin
+  matrix:
+    - env:
+        PY: "3.8"
+        PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
+    - env:
+        PY: "3.9"
+        PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
   install_pre_requirements_script:
-    - brew install python@3.8
-    - ln -s python3 /opt/homebrew/opt/python@3.8/bin/python
-  install_cibuildwheel_script:
-    - python -m pip install cibuildwheel==2.11.2
-  <<: *BUILD_AND_STORE_WHEEL
+    - brew install python@${PY}
+    - ln -s python3 /opt/homebrew/opt/python@${PY}/bin/python
+  test_python_script:
+    - python${PY} -V
 
 macos_arm64_cp38_task:
   name: Build macOS arm64 wheel
