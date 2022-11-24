@@ -16,8 +16,8 @@ jobs:
 
       - name: Download OpenBLAS
         run: gh release download --repo xianyi/OpenBLAS v0.3.21
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
 
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true
