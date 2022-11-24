@@ -16,7 +16,7 @@ test_task:
     - ln -s python3 /opt/homebrew/opt/python@3.8/bin/python
     - rehash
   install_cibuildwheel_script:
-    - python3 -m pip install cibuildwheel==2.11.2
+    - python -m pip install cibuildwheel==2.11.2
   <<: *BUILD_AND_STORE_WHEEL
 
 macos_arm64_cp38_task:
