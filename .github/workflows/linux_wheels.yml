@@ -6,8 +6,8 @@ jobs:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
-          - [x86_64, manylinux_x86_64, amd64, HASWELL]
-          - [aarch64, manylinux_aarch64, arm64, ARMV8]
+          - [x86_64, manylinux_x86_64, HASWELL, amd64]
+          - [aarch64, manylinux_aarch64, ARMV8, arm64]
     name: Linux wheels
     runs-on: ubuntu-20.04
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: ${{ matrix.arch[2] }}
+          platforms: ${{ matrix.arch[3] }}
 
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true
@@ -30,7 +30,7 @@ jobs:
             unzip test/demo.zip -d test/demo &&
             curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
             tar -xzf OpenBLAS-0.3.21.tar.gz &&
-            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[3] }} DYNAMIC_ARCH=1
+            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
