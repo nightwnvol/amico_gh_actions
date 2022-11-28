@@ -31,13 +31,13 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-  macos_wheels:
+  macos_x86_64_wheels:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [x86_64, macosx_x86_64, SANDYBRIDGE]
-    name: Macos wheels
+    name: MacOS x86_64 wheels
     runs-on: macos-11
     steps:
       - name: Checkout
