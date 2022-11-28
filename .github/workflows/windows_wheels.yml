@@ -1,14 +1,14 @@
 name: Windows wheels
 on: workflow_dispatch
 jobs:
-  build_wheels:
+  windows_wheels:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [AMD64, win_amd64, x64]
           - [x86, win32, x86]
-    name: Build wheel
+    name: Windows wheels
     runs-on: windows-2019
     steps:
       - name: Checkout

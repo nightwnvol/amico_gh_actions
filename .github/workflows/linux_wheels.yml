@@ -1,14 +1,14 @@
 name: Linux wheels
 on: workflow_dispatch
 jobs:
-  build_wheels:
+  linux_wheels:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [x86_64, manylinux_x86_64, amd64, HASWELL]
           - [aarch64, manylinux_aarch64, arm64, ARMV8]
-    name: Build wheel
+    name: Linux wheels
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
