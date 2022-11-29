@@ -1,6 +1,7 @@
+setuptools
+Cython
 packaging
 wheel
-setuptools>=46.1
 numpy>=1.12
 scipy>=1.0
 dipy>=1.0

@@ -248,8 +248,6 @@ class Loader:
 
         if self.verbose == 3:
             self._steps = []
-            # if self.type == 0:
-            #     self._steps = ['⢿', '⣻', '⣽', '⣾', '⣷', '⣯', '⣟', '⡿']
             if self.type == 1:
                 self._n = 1
                 self._steps = ['|', '/', '-', '\\']

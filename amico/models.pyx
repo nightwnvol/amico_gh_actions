@@ -17,20 +17,7 @@ from libc.stdlib cimport malloc, free
 from libc.math cimport pi, atan2, sqrt, pow as cpow
 from amico.lut cimport dir_to_lut_idx
 
-# NOTE SPAMS import
-# import warnings
-# warnings.filterwarnings("ignore") # needed for a problem with spams
-# warnings.formatwarning = lambda message, category, filename, lineno, line=None: \
-#     "[WARNING] %s " % message
-
-# # import the spams module, which is used only to fit the models in AMICO.
-# # But, on the other hand, using the models from COMMIT does not require that!
-# try :
-#     import spams
-# except ImportError:
-#     warnings.warn('Module "spams" does not seems to be installed; perhaps you will not be able to call the fit() functions of some models.')
-
-cdef extern from 'wrappers.h':
+cdef extern from 'solvers.h':
     cdef void nnls(const double *A, const double *y, const int m, const int n, double *x, double &rnorm) nogil
     cdef void lasso(double *A, double *y, const int m, const int p, const int n, const double lambda1, const double lambda2, double *x) nogil
 
@@ -46,12 +33,13 @@ cdef void _compute_rmse(double [::1, :]A_view, double [::1]y_view, double [::1]x
             y_est[i] += A_view[i, j] * x_view[j]
         rmse_view[0] += cpow(y_view[i] - y_est[i], 2.0) / y_view.shape[0]
     rmse_view[0] = sqrt(rmse_view[0])
+    free(y_est)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void _compute_nrmse(double [::1, :]A_view, double [::1]y_view, double [::1]x_view, double *nrmse_view) nogil:
-    cdef double den = 0.0
     cdef double *y_est = <double *>malloc(sizeof(double) * y_view.shape[0])
+    cdef double den = 0.0
 
     cdef Py_ssize_t i, j
     for i in range(A_view.shape[0]):
@@ -99,6 +87,7 @@ class BaseModel(ABC) :
         self.maps_name  = []
         self.maps_descr = []
         self.scheme = None
+        return
 
 
     @abstractmethod
@@ -190,14 +179,16 @@ class BaseModel(ABC) :
 
         Returns
         -------
-        TODO description
-        estiamtes: np.ndarray
+        estimates: np.ndarray
             Scalar values eastimated in each voxel
         rmse: np.ndarray (optional)
             Fitting error (Root Mean Square Error)
         nrmse: np.ndarray (optional)
             Fitting error (Normalized Root Mean Square Error)
-        TODO model specific returns
+        y_corrected: np.ndarray (optional)
+            Corrected DWI (only FreeWater model)
+        estimates_mod: np.ndarray (optional)
+            Modulated maps (only NODDI model)
         """
         # build chunks
         n = evaluation.y.shape[0]
@@ -493,6 +484,7 @@ class CylinderZeppelinBall( BaseModel ) :
 
     def fit(self, evaluation):
         super().fit(evaluation)
+
         # fit chunks in parallel
         chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
 
@@ -1379,9 +1371,10 @@ class SANDI( BaseModel ) :
 
         return KERNELS
 
-
+    
     def fit(self, evaluation):
         super().fit(evaluation)
+
         # fit chunks in parallel
         chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
 

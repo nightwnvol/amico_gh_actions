@@ -2,6 +2,63 @@
 requires = ["setuptools", "Cython"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "dmri-amico"
+version = "2.0.0"
+description = "Accelerated Microstructure Imaging via Convex Optimization (AMICO)"
+readme = "README.md"
+requires-python = ">=3.6" # NOTE need this?
+license = {file = "LICENSE"}
+authors = [
+    {name = "Alessandro Daducci"},
+    {email = "alessandro.daducci@univr.it"}
+]
+maintainers = [
+    {name = "Alessandro Daducci", email = "alessandro.daducci@univr.it"}
+]
+keywords = [
+    "Neuroimaging",
+    "NODDI",
+    "SANDI"
+]
+classifiers = [
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python",
+    "Programming Language :: Cython",
+    "License :: OSI Approved :: BSD License"
+]
+dependencies = [
+    "packaging", # NOTE need this?
+    "wheel", # NOTE need this?
+    "numpy>=1.12",
+    "scipy>=1.0",
+    "dipy>=1.0",
+    "tqdm>=4.56.0",
+    "joblib>=1.0.1",
+    "threadpoolctl>=3.1.0"
+]
+
+[project.urls]
+homepage = "https://github.com/daducci/AMICO"
+repository = "https://github.com/daducci/AMICO"
+documentation = "https://github.com/daducci/AMICO/wiki"
+changelog = "https://github.com/daducci/AMICO/blob/master/CHANGELOG.md"
+download = "https://pypi.org/project/dmri-amico"
+
+[tool.setuptools]
+platforms = [
+    "Windows",
+    "MacOS",
+    "Linux"
+]
+packages = [
+    "amico"
+]
+package-data = {amico = ["directions/*.bin"]}
+include-package-data = false
+
 [tool.cibuildwheel]
 test-command = "python {project}/test/noddi.py"
 test-skip = "*-win32 cp38-macosx_arm64 *-manylinux_aarch64"

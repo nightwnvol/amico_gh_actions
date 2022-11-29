@@ -17,7 +17,6 @@ from amico.util import LOG, NOTE, WARNING, ERROR
 cimport cython
 from libc.math cimport fmod, atan2, sqrt, pi, round as cround
 
-
 def valid_dirs():
     """Return the list of the supported number of directions.
 
@@ -330,7 +329,7 @@ cdef int dir_to_lut_idx(double [::1]direction, short [::1]hash_table) nogil:
     Returns
     -------
     lut_ixd: int
-        TODO description
+        LUT index
     """
     cdef double i1, i2
     cdef int ii1, ii2

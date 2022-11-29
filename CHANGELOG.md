@@ -9,7 +9,7 @@ All notable changes to AMICO will be documented in this file.
 - Implement multithreading
 
 ### Added
-- C++ wrappers for 'nnls' and 'lasso' functions
+- C++ solvers (NNLS and LASSO)
 - 'DTI_fit_method' config to choose the fitting method for the Diffusion Tensor model (dipy)
 - 'BLAS_threads' config to set the number of threads used in the threadpool-backend of common BLAS implementations (e.g. OpenBLAS)
 - Loader-like context manager 'util.Loader()'

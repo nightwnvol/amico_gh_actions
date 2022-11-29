@@ -14,7 +14,6 @@ dwi = 'NODDI_DWI.img'
 mask = 'brain_mask.img'
 b0_thr = 0
 regenerate = True
-ndirs = 500
 study_path = pjoin(pathlib.Path(__file__).parent.resolve())
 out_path = pjoin(pathlib.Path(__file__).parent.resolve(), 'res_' + ver, sub)
 amico.setup()
@@ -25,7 +24,7 @@ ae.set_config('doComputeNRMSE', True)
 ae.set_config('doSaveModulatedMaps', True)
 ae.load_data(dwi_filename=dwi, scheme_filename=scheme, mask_filename=mask, b0_thr=b0_thr)
 ae.set_model('NODDI')
-ae.generate_kernels(regenerate=regenerate, ndirs=ndirs)
+ae.generate_kernels(regenerate=regenerate)
 ae.load_kernels()
 ae.fit()
 ae.save_results()

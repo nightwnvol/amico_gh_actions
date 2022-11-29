@@ -1,9 +1,9 @@
 /*
-Wrappers (interfaces?) for NNLS and LASSO (SPAMS) functions
+Interfaces for NNLS and LASSO (SPAMS) functions
 */
 
-#ifndef WRAPPERS_H
-#define WRAPPERS_H
+#ifndef SOLVERS_H
+#define SOLVERS_H
 
 #include "nnls.h"
 #include "spams.h"
@@ -37,6 +37,8 @@ void nnls(const double *A, const double *y, const int m, const int n, double *x,
 // INPUT
 // A = (m, p)   Matrix stored as 1D contiguous array (column-major order)
 // y = (m, n)   Vector stored as 1D contiguous array
+// lambda1      Parameter for solving the Elastic-Net
+// lambda2      Parameter for solving the Elastic-Net
 
 // OUTPUT
 // x = (p, n)   Solution vector

@@ -22,7 +22,7 @@ from joblib import cpu_count
 from threadpoolctl import ThreadpoolController
 from tqdm import tqdm
 
-def setup( lmax=12, ndirs=None ) :
+def setup( lmax=12 ) :
     """General setup/initialization of the AMICO framework.
 
     Parameters
@@ -30,11 +30,7 @@ def setup( lmax=12, ndirs=None ) :
     lmax : int
         Maximum SH order to use for the rotation phase (default : 12).
         NB: change only if you know what you are doing.
-     ndirs : int
-        DEPRECATED. Now, all directions are precomputed.
     """
-    if ndirs is not None:
-        WARNING('"ndirs" parameter is deprecated')
     LOG( '\n-> Precomputing rotation matrices:' )
     for n in tqdm(valid_dirs(), ncols=70, bar_format='   |{bar}| {percentage:4.1f}%', disable=(get_verbose()<3)):
         amico.lut.precompute_rotation_matrices( lmax, n )
@@ -47,7 +43,7 @@ class Evaluation :
     evaluation with the AMICO framework.
     """
 
-    def __init__( self, study_path, subject, output_path=None ) :
+    def __init__( self, study_path='.', subject='.', output_path=None ) :
         """Setup the data structure with default values.
 
         Parameters
@@ -60,20 +56,20 @@ class Evaluation :
             Optionally sets a custom full path for the output. Leave as None
             for default behaviour - output in study_path/subject/AMICO/<MODEL>
         """
-        self.niiDWI         = None # set by "load_data" method
-        self.niiDWI_img     = None
-        self.scheme         = None
-        self.niiMASK        = None
-        self.niiMASK_img    = None
-        self.model          = None # set by "set_model" method
-        self.KERNELS        = None # set by "load_kernels" method
-        self.y              = None # set by "fit" method
-        self.DIRs           = None # set by "fit" method
-        self.n_threads      = None # set by "fit" method
-        self.BLAS_threads   = None # set by "generate_kernel", "load_kernels" and "fit" methods
-        self.RESULTS        = None # set by "fit" method
-        self.mean_b0s       = None # set by "load_data" method
-        self.htable         = None
+        self.niiDWI       = None    # set by "load_data" method
+        self.niiDWI_img   = None
+        self.scheme       = None
+        self.niiMASK      = None
+        self.niiMASK_img  = None
+        self.model        = None    # set by "set_model" method
+        self.KERNELS      = None    # set by "load_kernels" method
+        self.y            = None    # set by "fit" method
+        self.DIRs         = None    # set by "fit" method
+        self.n_threads    = None    # set by "fit" method
+        self.BLAS_threads = None    # set by "generate_kernel", "load_kernels" and "fit" methods
+        self.RESULTS      = None    # set by "fit" method
+        self.mean_b0s     = None    # set by "load_data" method
+        self.htable       = None
 
         # store all the parameters of an evaluation with AMICO
         self.CONFIG = {}
@@ -88,8 +84,8 @@ class Evaluation :
         self.set_config('doKeepb0Intact', False)        # does change b0 images in the predicted signal
         self.set_config('doComputeRMSE', False)
         self.set_config('doComputeNRMSE', False)
-        self.set_config('doSaveModulatedMaps', False)
-        self.set_config('doSaveCorrectedDWI', False)
+        self.set_config('doSaveModulatedMaps', False)   # NODDI model specific config
+        self.set_config('doSaveCorrectedDWI', False)    # FreeWater model specific config
         self.set_config('doMergeB0', False)             # Merge b0 volumes
         self.set_config('doDebiasSignal', False)        # Flag to remove Rician bias
         self.set_config('DWI-SNR', None)                # SNR of DWI image: SNR = b0/sigma
@@ -129,7 +125,7 @@ class Evaluation :
         if not isfile( pjoin(self.get_config('DATA_path'), dwi_filename) ):
             ERROR( 'DWI file not found' )
         self.set_config('dwi_filename', dwi_filename)
-        self.niiDWI  = nibabel.load( pjoin(self.get_config('DATA_path'), dwi_filename) )
+        self.niiDWI = nibabel.load( pjoin(self.get_config('DATA_path'), dwi_filename) )
         self.niiDWI_img = self.niiDWI.get_data().astype(np.float32)
         hdr = self.niiDWI.header if nibabel.__version__ >= '2.0.0' else self.niiDWI.get_header()
         if self.niiDWI_img.ndim != 4 :
@@ -164,7 +160,7 @@ class Evaluation :
         if mask_filename is not None :
             if not isfile( pjoin(self.get_config('DATA_path'), mask_filename) ):
                 ERROR( 'MASK file not found' )
-            self.niiMASK  = nibabel.load( pjoin( self.get_config('DATA_path'), mask_filename) )
+            self.niiMASK = nibabel.load( pjoin( self.get_config('DATA_path'), mask_filename) )
             self.niiMASK_img = self.niiMASK.get_data().astype(np.uint8)
             niiMASK_hdr = self.niiMASK.header if nibabel.__version__ >= '2.0.0' else self.niiMASK.get_header()
             PRINT('\t\t- dim    = %d x %d x %d' % self.niiMASK_img.shape[:3])
@@ -286,7 +282,7 @@ class Evaluation :
         self.set_config('solver_params', self.model.set_solver( **params ))
 
 
-    def generate_kernels( self, regenerate = False, lmax = 12, ndirs = 32761 ) :
+    def generate_kernels( self, regenerate = False, lmax = 12, ndirs = 500 ) :
         """Generate the high-resolution response functions for each compartment.
         Dispatch to the proper function, depending on the model.
 
@@ -297,7 +293,7 @@ class Evaluation :
         lmax : int
             Maximum SH order to use for the rotation procedure (default : 12)
         ndirs : int
-            Number of directions on the half of the sphere representing the possible orientations of the response functions (default : 32761)
+            Number of directions on the half of the sphere representing the possible orientations of the response functions (default : 500)
         """
         if self.scheme is None :
             ERROR( 'Scheme not loaded; call "load_data()" first' )
@@ -305,9 +301,9 @@ class Evaluation :
             ERROR( 'Model not set; call "set_model()" method first' )
         if not is_valid(ndirs):
             ERROR( 'Unsupported value for ndirs.\nNote: Supported values for ndirs are [1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 32761 (default)]' )
-
-        self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
         
+        self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
+
         # store some values for later use
         self.set_config('lmax', lmax)
         self.set_config('ndirs', ndirs)
@@ -346,7 +342,7 @@ class Evaluation :
             ERROR( 'Model not set; call "set_model()" method first' )
         if self.scheme is None :
             ERROR( 'Scheme not loaded; call "load_data()" first' )
-
+        
         self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
 
         tic = time.time()
@@ -377,10 +373,11 @@ class Evaluation :
             ERROR( 'Response functions not generated; call "generate_kernels()" and "load_kernels()" first' )
         if self.KERNELS['model'] != self.model.id :
             ERROR( 'Response functions were not created with the same model' )
-
+        if self.get_config('DTI_fit_method') not in ['OLS', 'WLS']:
+            ERROR("DTI fit method must be 'OLS' or 'WLS'")
+        
         self.n_threads = self.get_config('n_threads') if self.get_config('n_threads') > 0 else cpu_count() if self.get_config('n_threads') == -1 else ERROR('Number of parallel threads must be positive or -1')
         self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
-        if self.get_config('DTI_fit_method') not in ['OLS', 'WLS']: ERROR("DTI fit method must be 'OLS' or 'WLS'")
 
         self.set_config('fit_time', None)
         totVoxels = np.count_nonzero(self.niiMASK_img)
