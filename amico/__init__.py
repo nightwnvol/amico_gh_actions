@@ -14,5 +14,5 @@ from . import util
 try:
     from importlib.metadata import version
 except ImportError:
-    from importlib_metadaata import version
+    from importlib_metadata import version
 __version__ = version('dmri-amico')
