@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dmri-amico"
-version = "2.0.0"
 description = "Accelerated Microstructure Imaging via Convex Optimization (AMICO)"
 readme = "README.md"
 requires-python = ">=3.6" # NOTE need this?
@@ -37,8 +36,10 @@ dependencies = [
     "dipy>=1.0",
     "tqdm>=4.56.0",
     "joblib>=1.0.1",
-    "threadpoolctl>=3.1.0",
-    "importlib-metadata; python_version<'3.7'"
+    "threadpoolctl>=3.1.0"
+]
+dynamic = [
+    "version"
 ]
 
 [project.urls]
@@ -59,6 +60,9 @@ packages = [
 ]
 package-data = {amico = ["directions/*.bin"]}
 include-package-data = false
+
+[tool.setuptools.dynamic]
+version = {attr = "amico.version.VERSION"}
 
 [tool.cibuildwheel]
 test-command = "python {project}/test/noddi.py"
