@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=59.6.0",
+    "setuptools>=65.6.3",
     "Cython>=0.29.32"
 ]
 build-backend = "setuptools.build_meta"
@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "dmri-amico"
 description = "Accelerated Microstructure Imaging via Convex Optimization (AMICO)"
 readme = "README.md"
-requires-python = ">=3.6" # NOTE need this?
+requires-python = ">=3.7" # NOTE need this?
 license = {file = "LICENSE"}
 authors = [
     {name = "Alessandro Daducci"},
