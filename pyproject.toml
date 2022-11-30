@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools", "Cython"]
+requires = [
+    "setuptools>=65.6.3",
+    "Cython>=0.29.32"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,9 +15,7 @@ authors = [
     {name = "Alessandro Daducci"},
     {email = "alessandro.daducci@univr.it"}
 ]
-maintainers = [
-    {name = "Alessandro Daducci", email = "alessandro.daducci@univr.it"}
-]
+maintainers = [{name = "Alessandro Daducci", email = "alessandro.daducci@univr.it"}]
 keywords = [
     "Neuroimaging",
     "NODDI",
@@ -38,9 +39,7 @@ dependencies = [
     "joblib>=1.0.1",
     "threadpoolctl>=3.1.0"
 ]
-dynamic = [
-    "version"
-]
+dynamic = ["version"]
 
 [project.urls]
 homepage = "https://github.com/daducci/AMICO"
@@ -55,9 +54,7 @@ platforms = [
     "MacOS",
     "Linux"
 ]
-packages = [
-    "amico"
-]
+packages = ["amico"]
 package-data = {amico = ["directions/*.bin"]}
 include-package-data = false
 
