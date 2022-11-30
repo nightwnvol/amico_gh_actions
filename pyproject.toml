@@ -37,7 +37,8 @@ dependencies = [
     "dipy>=1.0",
     "tqdm>=4.56.0",
     "joblib>=1.0.1",
-    "threadpoolctl>=3.1.0"
+    "threadpoolctl>=3.1.0",
+    "importlib_metadata; python_version<3.7"
 ]
 
 [project.urls]
