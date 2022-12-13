@@ -1,20 +1,11 @@
 name: Compile OpenBLAS on MacOS
-on:
-  workflow_call:
-    outputs:
-      output1:
-        description: "Compiled OpenBLAS"
-        value: ${{ jobs.ob_linux_x86_64.outputs.output1 }}
+on: workflow_dispatch
 jobs:
   ob_linux_x86_64:
     name: Compile OpenBLAS on MacOS x86_64
     runs-on: macos-11
-    outputs:
-      output1: ${{ steps.compile.outputs.compiled }}
-
     steps:
       - name: Compile
-      - id: compile
         run: |
           curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
           tar -xzf OpenBLAS-0.3.21.tar.gz
