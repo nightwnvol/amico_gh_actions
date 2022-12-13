@@ -18,11 +18,11 @@ jobs:
         # continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
         env:
-          # OPENBLAS_DIR: $(pwd)\\OpenBLAS
+          OPENBLAS_DIR: $(pwd)\\OpenBLAS
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$(pwd)\\OpenBLAS
+          # CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$(pwd)\\OpenBLAS
           CIBW_BEFORE_ALL_WINDOWS: >
             echo CIAO &&
             echo $env:OPENBLAS_DIR &&
