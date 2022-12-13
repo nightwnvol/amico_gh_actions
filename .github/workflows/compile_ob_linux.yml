@@ -1,0 +1,17 @@
+name: Compile OpenBLAS on Linux
+on: workflow_dispatch
+jobs:
+  OpenBLAS_macos_x86_64:
+    name: Linux aarch64
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+      
+      - name: Run Docker
+        run: |
+          docker create --name=openblas_aarch64 --interactive --volume=/:/host quay.io/pypa/manylinux2014_aarch64:latest /bin/bash
+          docker start --attach --interactive openblas_aarch64
+          echo hello
