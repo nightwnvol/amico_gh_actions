@@ -17,4 +17,6 @@ jobs:
           docker start openblas_aarch64
           docker ps -a
           docker exec -i openblas_aarch64 echo "hello world"
-          docker ps -a
+          docker exec -i openblas_aarch64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_aarch64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_aarch64 sh -c "make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1"
