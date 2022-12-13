@@ -14,5 +14,5 @@ jobs:
         run: |
           docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_aarch64:latest /bin/bash
           docker start --attach -i openblas_aarch64
-          docker ls -a
+          docker ps -a
           docker exec -i openblas_aarch64 sh -c echo hello
