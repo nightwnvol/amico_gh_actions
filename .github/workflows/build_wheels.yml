@@ -28,10 +28,10 @@ jobs:
             7z x OpenBLAS-0.3.21.zip -o"OpenBLAS" &&
             echo CIAO &&
             dir &&
-            dir & OpenBLAS &&
-            dir & OpenBLAS\include &&
-            dir & OpenBLAS\lib &&
-            dir & OpenBLAS\bin &&
+            dir OpenBLAS &&
+            dir OpenBLAS\include &&
+            dir OpenBLAS\lib &&
+            dir OpenBLAS\bin &&
             pwd
       
       - name: Upload artifacts
