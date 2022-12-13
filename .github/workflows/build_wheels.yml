@@ -28,7 +28,7 @@ jobs:
             7z x OpenBLAS-0.3.21.zip -o"OpenBLAS" &&
             echo CIAO &&
             dir &&
-            echo "$(pwd)"
+            pwd
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
