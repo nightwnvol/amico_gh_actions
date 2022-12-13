@@ -24,7 +24,7 @@ jobs:
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip &&
-            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS-0.3.21"
+            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -55,7 +55,8 @@ jobs:
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
             tar -xzf OpenBLAS-0.3.21.tar.gz &&
-            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1
+            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1 &&
+            make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -92,7 +93,8 @@ jobs:
             unzip test/demo.zip -d test/demo &&
             curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
             tar -xzf OpenBLAS-0.3.21.tar.gz &&
-            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1
+            make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1 &&
+            make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3

@@ -23,7 +23,8 @@ macos_arm64_wheels_task:
       7z x test/demo.zip -o"test/demo" &&
       curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
       tar -xzf OpenBLAS-0.3.21.tar.gz &&
-      make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
+      make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1 &&
+      make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS
   install_pre_requirements_script:
     - brew install p7zip
     - brew install python@${PY}

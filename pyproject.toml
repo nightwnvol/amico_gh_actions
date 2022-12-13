@@ -1,21 +1,25 @@
 [build-system]
 requires = [
     "setuptools",
-    "Cython>=0.29.32"
+    "Cython>=0.29.32",
+    "cyspams @ git+https://github.com/getspams/spams-cython.git@main"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dmri-amico"
+version = "2.0.0"
 description = "Accelerated Microstructure Imaging via Convex Optimization (AMICO)"
 readme = "README.md"
-requires-python = ">=3.6" # NOTE need this?
-license = {file = "LICENSE"}
+requires-python = ">=3.7"
+license = {text = "BSD 3-Clause License"} # NOTE open bug https://github.com/pypi/warehouse/issues/12392
 authors = [
     {name = "Alessandro Daducci"},
     {email = "alessandro.daducci@univr.it"}
 ]
-maintainers = [{name = "Alessandro Daducci", email = "alessandro.daducci@univr.it"}]
+maintainers = [
+    {name = "Alessandro Daducci", email = "alessandro.daducci@univr.it"}
+]
 keywords = [
     "Neuroimaging",
     "NODDI",
@@ -26,27 +30,25 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Programming Language :: Python",
-    "Programming Language :: Cython",
-    "License :: OSI Approved :: BSD License"
+    "Programming Language :: Cython"
 ]
 dependencies = [
-    "packaging", # NOTE need this?
-    "wheel", # NOTE need this?
     "numpy>=1.12",
     "scipy>=1.0",
     "dipy>=1.0",
     "tqdm>=4.56.0",
     "joblib>=1.0.1",
-    "threadpoolctl>=3.1.0"
+    "threadpoolctl>=3.1.0",
+    "importlib-metadata; python_version<'3.8'"
 ]
-dynamic = ["version"]
 
 [project.urls]
-homepage = "https://github.com/daducci/AMICO"
-repository = "https://github.com/daducci/AMICO"
-documentation = "https://github.com/daducci/AMICO/wiki"
-changelog = "https://github.com/daducci/AMICO/blob/master/CHANGELOG.md"
-download = "https://pypi.org/project/dmri-amico"
+Homepage = "https://github.com/daducci/AMICO"
+Documentation = "https://github.com/daducci/AMICO/wiki"
+Source = "https://github.com/daducci/AMICO"
+Changelog = "https://github.com/daducci/AMICO/blob/master/CHANGELOG.md"
+Download = "https://pypi.org/project/dmri-amico"
+Tracker = "https://github.com/daducci/AMICO/issues"
 
 [tool.setuptools]
 platforms = [
@@ -58,19 +60,16 @@ packages = ["amico"]
 package-data = {amico = ["directions/*.bin"]}
 include-package-data = false
 
-[tool.setuptools.dynamic]
-version = {attr = "amico.version.VERSION"}
-
 [tool.cibuildwheel]
 test-command = "python {project}/test/noddi.py"
 test-skip = "*-win32 cp38-macosx_arm64 *-manylinux_aarch64"
 
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
-repair-wheel-command = "delvewheel repair --add-path .\\OpenBLAS-0.3.21\\bin -w {dest_dir} -v {wheel}"
+repair-wheel-command = "delvewheel repair --add-path .\\OpenBLAS\\bin -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.macos]
-repair-wheel-command = "DYLD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+repair-wheel-command = "DYLD_LIBRARY_PATH=$(pwd)/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.linux]
-repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS-0.3.21 auditwheel repair -w {dest_dir} {wheel}"
+repair-wheel-command = "LD_LIBRARY_PATH=$(pwd)/OpenBLAS/lib auditwheel repair -w {dest_dir} {wheel}"

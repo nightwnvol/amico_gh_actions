@@ -3,5 +3,3 @@ include LICENSE
 
 include amico/*pyx
 include amico/*pxd
-include amico/*.h
-recursive-include src *.h

@@ -16,10 +16,12 @@ cimport cython
 from libc.stdlib cimport malloc, free
 from libc.math cimport pi, atan2, sqrt, pow as cpow
 from amico.lut cimport dir_to_lut_idx
+from cyspams.interfaces cimport nnls, lasso
 
-cdef extern from 'solvers.h':
-    cdef void nnls(const double *A, const double *y, const int m, const int n, double *x, double &rnorm) nogil
-    cdef void lasso(double *A, double *y, const int m, const int p, const int n, const double lambda1, const double lambda2, double *x) nogil
+# WARNING this is for internal test purposes
+from pathlib import Path
+if Path(__file__).parent.resolve().joinpath('supersecret.py').exists():
+    from amico.supersecret import *
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -338,7 +340,7 @@ class StickZeppelinBall( BaseModel ) :
         return KERNELS
 
 
-    def fit( self, y, dirs, KERNELS, params ) :
+    def fit(self, evaluation):
         ERROR( 'Not implemented' )
 
 
@@ -526,13 +528,11 @@ class CylinderZeppelinBall( BaseModel ) :
         cdef double [::1, :, :]kernels_wmh_view = np.asfortranarray(np.swapaxes(kernels['wmh'].T, 1, 2)).astype(np.double)
         cdef double [::1, :]kernels_iso_view = np.asfortranarray(kernels['iso'].T).astype(np.double)
 
-        # y
+        # y, A, x
         if not y.flags['C_CONTIGUOUS']:
             y = np.ascontiguousarray(y)
         cdef double [:, ::1]y_view = y
-        # A
         cdef double [::1, :]A_view = np.zeros((kernels_wmr_view.shape[0], n_atoms), dtype=np.double, order='F')
-        # x
         cdef double [::1]x_view = np.zeros(n_atoms, dtype=np.double)
 
         # return
@@ -568,7 +568,7 @@ class CylinderZeppelinBall( BaseModel ) :
                 A_view[:, n_rs + n_perp:] = kernels_iso_view[:, :]
 
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, &x_view[0], lambda1, lambda2)
 
                 # estimates
                 f1 = 0.0
@@ -779,25 +779,20 @@ class NODDI( BaseModel ) :
         cdef float [::1]kernels_icvf_view = kernels['icvf']
         cdef float [::1]kernels_kappa_view = kernels['kappa']
 
-        # TODO reorganize comments
-        # y
+        # y, A, x
         if not y.flags['C_CONTIGUOUS']:
             y = np.ascontiguousarray(y)
         cdef double [:, ::1]y_view = y
-        # A
         cdef double [::1, :]A_view = np.zeros((kernels_wm_view.shape[0], n_atoms), dtype=np.double, order='F')
-        # x
         cdef double [::1]x_view = np.zeros(n_atoms, dtype=np.double)
         cdef double r_norm = 0.0
 
-        # y_2
+        # y_2, A_2
         cdef double [::1]y2_view = np.zeros(kernels_norms_view.shape[0], dtype=np.double)
-        # A_2
         cdef double [::1, :]A2_view = np.zeros((kernels_norms_view.shape[0], kernels_norms_view.shape[1]), dtype=np.double, order='F')
         
-        # A_3
+        # A_3, x_3
         cdef double [::1, :]A3_view = np.zeros((kernels_wm_view.shape[0], n_atoms), dtype=np.double, order='F')
-        # x_3
         cdef double [::1]x3_view = np.zeros(n_atoms, dtype=np.double)
 
         cdef int positive_count = 0
@@ -860,7 +855,7 @@ class NODDI( BaseModel ) :
                         y2_view[j] = y2_view[j] - x_view[n_atoms-2] * 1.0
                     if y2_view[j] < 0.0:
                         y2_view[j] = 0.0
-                lasso(&A2_view[0, 0], &y2_view[0], A2_view.shape[0], A2_view.shape[1], 1, lambda1, lambda2, &x_view[0])
+                lasso(&A2_view[0, 0], &y2_view[0], A2_view.shape[0], A2_view.shape[1], 1, &x_view[0], lambda1, lambda2)
 
                 # fit_3 (debias coefficients)
                 positive_count = 0
@@ -1098,13 +1093,11 @@ class FreeWater( BaseModel ) :
         cdef double [::1, :, :]kernels_D_view = np.asfortranarray(np.swapaxes(kernels['D'].T, 1, 2)).astype(np.double)
         cdef double [::1, :]kernels_CSF_view = np.asfortranarray(kernels['CSF'].T).astype(np.double)
 
-        # y
+        # y, A, x
         if not y.flags['C_CONTIGUOUS']:
             y = np.ascontiguousarray(y)
         cdef double [:, ::1]y_view = y
-        # A
         cdef double [::1, :]A_view = np.zeros((kernels_D_view.shape[0], n_atoms), dtype=np.double, order='F')
-        # x
         cdef double [::1]x_view = np.zeros(n_atoms, dtype=np.double)
 
         # return
@@ -1145,7 +1138,7 @@ class FreeWater( BaseModel ) :
                 A_view[:, n_perp:] = kernels_CSF_view[:, :]
 
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, &x_view[0], lambda1, lambda2)
 
                 # estimates
                 x_sum = 0.0
@@ -1235,7 +1228,7 @@ class VolumeFractions( BaseModel ) :
         return KERNELS
 
 
-    def fit( self, y, dirs, KERNELS, params ) :
+    def fit(self, evaluation):
         ERROR( 'Not implemented' )
 
 
@@ -1405,13 +1398,11 @@ class SANDI( BaseModel ) :
             kernels['signal'] = np.asfortranarray(kernels['signal'])
         cdef double [::1]kernels_norms_view = kernels['norms']
 
-        # y
+        # y, A, x
         if not y.flags['C_CONTIGUOUS']:
             y = np.ascontiguousarray(y)
         cdef double [:, ::1]y_view = y
-        # A
         cdef double [::1, :]A_view = kernels['signal']
-        # x
         cdef double [::1]x_view = np.zeros(n_atoms, dtype=np.double)
 
         # return
@@ -1449,7 +1440,7 @@ class SANDI( BaseModel ) :
         with nogil:
             for i in range(y_view.shape[0]):
                 # fit
-                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, lambda1, lambda2, &x_view[0])
+                lasso(&A_view[0, 0], &y_view[i, 0], A_view.shape[0], A_view.shape[1], 1, &x_view[0], lambda1, lambda2)
                 for j in range(kernels_norms_view.shape[0]):
                     x_view[j] = x_view[j] * kernels_norms_view[j]
 
