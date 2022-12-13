@@ -15,6 +15,7 @@ macos_arm64_wheels_task:
         CP: "310"
   env:
     PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
+    OPENBLAS_DIR: $(pwd)/OpenBLAS
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
