@@ -33,7 +33,7 @@ jobs:
             dir OpenBLAS\lib &&
             dir OpenBLAS\bin &&
             pwd &&
-            "$(OPENBLAS_DIR)"
+            echo "$(OPENBLAS_DIR)"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
