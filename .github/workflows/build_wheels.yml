@@ -23,8 +23,8 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
           CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$(pwd)\\OpenBLAS
           CIBW_BEFORE_ALL_WINDOWS: >
-            echo CIAO
-            echo $env:OPENBLAS_DIR
+            echo CIAO &&
+            echo $OPENBLAS_DIR &&
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip &&
             7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
