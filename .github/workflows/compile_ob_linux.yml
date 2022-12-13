@@ -12,7 +12,7 @@ jobs:
       
       - name: Run Docker
         run: |
-          docker create --name=openblas_aarch64 -i -t --volume=/:/host quay.io/pypa/manylinux2014_aarch64:latest
+          docker create --name=openblas_aarch64 -i -t --volume=/:/host quay.io/pypa/manylinux2014_aarch64:latest /bin/bash
           docker start --attach -i openblas_aarch64
           echo hello
           curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
