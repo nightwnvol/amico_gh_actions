@@ -18,10 +18,10 @@ jobs:
         # continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
         env:
+          OPENBLAS_DIR: $(pwd)\\OpenBLAS
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$(pwd)\OpenBLAS"
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip &&
@@ -48,10 +48,11 @@ jobs:
         # continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
         env:
+          OPENBLAS_DIR: $(pwd)/OpenBLAS
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="$(pwd)/OpenBLAS"
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9"
           CIBW_BEFORE_ALL_MACOS: >
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
@@ -87,10 +88,10 @@ jobs:
         timeout-minutes: 600
         uses: pypa/cibuildwheel@v2.11.2
         env:
+          OPENBLAS_DIR: $(pwd)/OpenBLAS
           CIBW_PLATFORM: linux
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="$(pwd)/OpenBLAS"
           CIBW_BEFORE_ALL_LINUX: >
             unzip test/demo.zip -d test/demo &&
             curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz &&
