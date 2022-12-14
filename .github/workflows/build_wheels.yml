@@ -17,6 +17,7 @@ jobs:
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
+        shell: pwsh
         env:
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
