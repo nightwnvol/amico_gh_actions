@@ -1,5 +1,5 @@
 name: Build wheels
-on: workflow_dispatch
+on: push # workflow_dispatch
 jobs:
   windows_wheels:
     strategy:
