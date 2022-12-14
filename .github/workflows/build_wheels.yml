@@ -17,18 +17,15 @@ jobs:
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
-        shell: pwsh
         env:
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$(pwd)\\OpenBLAS
+          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$PWD\\OpenBLAS
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
             curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip &&
-            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS" &&
-            echo CIAO &&
-            echo $env:OPENBLAS_DIR
+            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
