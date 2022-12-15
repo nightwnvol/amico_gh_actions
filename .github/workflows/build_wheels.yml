@@ -73,6 +73,7 @@ jobs:
           - [aarch64, manylinux_aarch64, ARMV8, arm64]
     name: Linux wheels
     runs-on: ubuntu-20.04
+    timeout-minutes: 600
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -84,7 +85,6 @@ jobs:
 
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true # TODO false
-        timeout-minutes: 600
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_PLATFORM: linux
