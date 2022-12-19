@@ -10,8 +10,9 @@ compile_ob_macos_task:
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
+    - tar -czf OpenBLAS.tar.gz OpenBLAS
   compiled_openblas_artifacts:
-    path: 'OpenBLAS'
+    path: 'OpenBLAS.tar.gz'
 
 macos_arm64_wheels_noob_task:
   name: MacOS (arm64) wheels no OpenBLAS
@@ -38,6 +39,7 @@ macos_arm64_wheels_noob_task:
       7z x test/demo.zip -o"test/demo"
   download_compiled_openblas_artifact_script:
     - curl -L -o OpenBLAS https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_ob_macos_task/OpenBLAS
+    - tar -xzf OpenBLAS.tar.gz
   install_pre_requirements_script:
     - brew install p7zip
     - brew install python@${PY}
