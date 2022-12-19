@@ -59,7 +59,7 @@ jobs:
             name: OpenBLAS
 
             # Optional, a directory where to extract artifact(s), defaults to the current directory
-            # path: extract_here
+            path: OpenBLAS
 
             # Optional, defaults to current repo
             repo: ${{ github.repository }}
