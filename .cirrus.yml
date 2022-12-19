@@ -1,3 +1,53 @@
+compile_ob_macos_task:
+  name: Compile OpenBLAS on MacOS arm64
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
+  env:
+    MACOSX_DEPLOYMENT_TARGET: "10.9"
+  compile_script:
+    - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
+    - tar -xzf OpenBLAS-0.3.21.tar.gz
+    - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
+    - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
+  compile_artifacts:
+    path: 'OpenBLAS'
+
+macos_arm64_wheels_noob_task:
+  name: MacOS (arm64) wheels no OpenBLAS
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
+  matrix:
+    - env:
+        PY: "3.8"
+        CP: "38"
+    - env:
+        PY: "3.9"
+        CP: "39"
+    - env:
+        PY: "3.10"
+        CP: "310"
+  env:
+    PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
+    CIBW_PLATFORM: macos
+    CIBW_BUILD: cp${CP}-macosx_arm64
+    CIBW_ARCHS_MACOS: arm64
+    CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="$(pwd)/OpenBLAS"
+    CIBW_BEFORE_ALL_MACOS: >
+      7z x test/demo.zip -o"test/demo"
+  download_compiled_openblas_artifact_script:
+    - curl -L -o OpenBLAS https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_ob_macos_task/OpenBLAS
+  install_pre_requirements_script:
+    - brew install p7zip
+    - brew install python@${PY}
+  install_cibuildwheel_script:
+    - python${PY} -m pip install cibuildwheel==2.11.2
+  run_cibuildwheel_script:
+    - cibuildwheel
+  wheels_artifacts:
+    path: 'wheelhouse/*'
+
 macos_arm64_wheels_task:
   name: MacOS (arm64) wheels
   trigger_type: manual
