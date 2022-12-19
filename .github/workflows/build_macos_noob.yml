@@ -62,7 +62,7 @@ jobs:
             path: OpenBLAS
 
             # Optional, defaults to current repo
-            repo: ${{ github.repository }}
+            # repo: ${{ github.repository }}
 
             # Optional, check the workflow run to whether it has an artifact
             # then will get the last available artifact from the previous workflow
