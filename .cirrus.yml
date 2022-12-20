@@ -38,7 +38,7 @@ macos_arm64_wheels_noob_task:
     CIBW_BEFORE_ALL_MACOS: >
       7z x test/demo.zip -o"test/demo"
   download_compiled_openblas_artifact_script:
-    - curl -L -o OpenBLAS https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_ob_macos_task/OpenBLAS.tar.gz
+    - curl -L -o OpenBLAS https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_ob_macos/compiled_openblas/OpenBLAS.tar.gz
     - tar -xzf OpenBLAS.tar.gz
   install_pre_requirements_script:
     - brew install p7zip
