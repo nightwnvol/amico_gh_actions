@@ -8,11 +8,11 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: amd64 # TODO make matrix
+          platforms: amd64 # TODO make matrix and change also down in docker create
       
       - name: Run Docker
         run: |
-          docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_aarch64:latest /bin/bash
+          docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_X86_64:latest /bin/bash
           docker ps -a
           docker start openblas_aarch64
           docker ps -a
