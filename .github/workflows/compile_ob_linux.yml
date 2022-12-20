@@ -2,13 +2,13 @@ name: Compile OpenBLAS on Linux
 on: workflow_dispatch
 jobs:
   OpenBLAS_macos_x86_64:
-    name: Linux aarch64
+    name: Linux amd64
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: arm64
+          platforms: amd64 # TODO make matrix
       
       - name: Run Docker
         run: |
