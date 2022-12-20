@@ -13,14 +13,17 @@ jobs:
       - name: Run Docker
         run: |
           docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
-          docker ps -a
           docker start openblas_aarch64
-          docker ps -a
           docker exec -i openblas_aarch64 echo "hello world"
           docker exec -i openblas_aarch64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
           docker exec -i openblas_aarch64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_aarch64 sh -c "ls -lt"
-          ls -lt
+          docker exec -i openblas_aarch64 sh -c "ls -l"
+          echo "halo"
+          ls -l
+          docker cp openblas_aarch64:OpenBLAS-0.3.21 .
+          echo "halo2"
+          ls -l
+
         # run: |
         #   docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
         #   docker ps -a
