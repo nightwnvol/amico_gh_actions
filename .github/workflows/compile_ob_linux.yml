@@ -34,6 +34,7 @@ jobs:
           echo "here2"
           docker exec -i openblas_x86_64 sh -c "ls -l"
           echo "here3"
+          docker exec -i openblas_x86_64 sh -c "ls -l host"
           echo "halo"
           docker exec -i openblas_x86_64 sh -c "pwd"
           echo "halo2"
