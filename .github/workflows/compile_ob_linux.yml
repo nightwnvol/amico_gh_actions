@@ -1,5 +1,5 @@
 name: Compile OpenBLAS on Linux
-on: push
+on: workflow_dispatch
 jobs:
   OpenBLAS_macos_x86_64:
     name: Linux amd64
@@ -12,33 +12,21 @@ jobs:
       
       - name: Run Docker
         run: |
-          docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
-          docker start openblas_aarch64
-          docker exec -i openblas_aarch64 echo "hello world"
-          docker exec -i openblas_aarch64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_aarch64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_aarch64 sh -c "ls -l"
+          docker create --name=openblas_x86_64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
+          docker start openblas_x86_64
+          docker exec -i openblas_x86_64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_x86_64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_x86_64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
+          docker exec -i openblas_x86_64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS"
+          docker exec -i openblas_x86_64 sh -c "ls -l"
           echo "halo"
           ls -l
-          docker cp openblas_aarch64:OpenBLAS-0.3.21 .
+          docker cp openblas_x86_64:OpenBLAS .
           echo "halo2"
           ls -l
-
-        # run: |
-        #   docker create --name=openblas_aarch64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
-        #   docker ps -a
-        #   docker start openblas_aarch64
-        #   docker ps -a
-        #   docker exec -i openblas_aarch64 echo "hello world"
-        #   docker exec -i openblas_aarch64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
-        #   docker exec -i openblas_aarch64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
-        #   docker exec -i openblas_aarch64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
-        #   docker exec -i openblas_aarch64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS"
-        #   docker exec -i openblas_aarch64 sh -c "ls -lt"
-        #   docker cp openblas_aarch64:OpenBLAS .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: OpenBLAS
-          path: ./OpenBLAS-0.3.21
+          path: ./OpenBLAS
