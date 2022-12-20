@@ -32,7 +32,6 @@ jobs:
           echo "here1"
           ls -l
           echo "here2"
-          docker exec -i openblas_x86_64 sh -c "ls -l $PWD"
           echo "here3"
           docker exec -i openblas_x86_64 sh -c "ls -l /host$PWD"
 
