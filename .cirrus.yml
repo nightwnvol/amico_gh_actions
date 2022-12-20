@@ -1,5 +1,4 @@
 compile_ob_macos_task:
-  name: Compile OpenBLAS on MacOS arm64
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
@@ -10,7 +9,7 @@ compile_ob_macos_task:
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
-    - tar -czf OpenBLAS.tar.gz OpenBLAS
+    - tar -czf OpenBLAS.tar.gz OpenBLAS/*
   compiled_openblas_artifacts:
     path: 'OpenBLAS.tar.gz'
 
