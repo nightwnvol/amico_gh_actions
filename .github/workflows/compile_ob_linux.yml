@@ -37,8 +37,8 @@ jobs:
         #   docker exec -i openblas_aarch64 sh -c "ls -lt"
         #   docker cp openblas_aarch64:OpenBLAS .
 
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: OpenBLAS
-      #     path: ./OpenBLAS
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenBLAS
+          path: ./OpenBLAS-0.3.21
