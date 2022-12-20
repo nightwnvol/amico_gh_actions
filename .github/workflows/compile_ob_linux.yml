@@ -2,7 +2,7 @@ name: Compile OpenBLAS on Linux
 on: workflow_dispatch
 jobs:
   OpenBLAS_linux:
-  strategy:
+    strategy:
       matrix:
         arch:
           - [x86_64, manylinux2014_x86_64, HASWELL, amd64]
