@@ -11,29 +11,16 @@ jobs:
           platforms: amd64 # TODO make matrix and change also down in docker create
       
       - name: Run Docker
-        # run: |
-        #   docker create --name=openblas_x86_64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
-        #   docker start openblas_x86_64
-        #   docker exec -i openblas_x86_64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
-        #   docker exec -i openblas_x86_64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
-        #   docker exec -i openblas_x86_64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
-        #   docker exec -i openblas_x86_64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS"
-        #   docker exec -i openblas_x86_64 sh -c "ls -l"
-        #   echo "halo"
-        #   ls -l
-        #   docker cp openblas_x86_64:OpenBLAS .
-        #   echo "halo2"
-        #   ls -l
-
         run: |
           docker create --name=openblas_x86_64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
           docker start openblas_x86_64
-          curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
-          echo "here1"
-          ls -l
-          echo "here2"
-          echo "here3"
+          docker exec -i openblas_x86_64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_x86_64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_x86_64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
+          docker exec -i openblas_x86_64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=/host$PWD/OpenBLAS"
           docker exec -i openblas_x86_64 sh -c "ls -l /host$PWD"
+          echo "halo"
+          ls -l
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
