@@ -1,6 +1,6 @@
 env:
-  CIRRUS_BUILD_ID: "0.3.21"
-  
+  CIRRUS_BUILD_ID: "52632"
+
 compile_ob_macos_task:
   trigger_type: manual
   macos_instance:
