@@ -32,16 +32,9 @@ jobs:
           echo "here1"
           ls -l
           echo "here2"
-          docker exec -i openblas_x86_64 sh -c "ls -l"
+          docker exec -i openblas_x86_64 sh -c "ls -l $PWD"
           echo "here3"
-          docker exec -i openblas_x86_64 sh -c "pwd"
-          docker exec -i openblas_x86_64 sh -c "ls -l host"
-          echo "halo"
-          docker exec -i openblas_x86_64 sh -c "pwd"
-          echo "halo2"
-          ls -l
-          echo "halo3"
-          pwd
+          docker exec -i openblas_x86_64 sh -c "ls -l /host$PWD"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
