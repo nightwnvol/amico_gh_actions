@@ -28,9 +28,12 @@ jobs:
         run: |
           docker create --name=openblas_x86_64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
           docker start openblas_x86_64
-          docker exec -i openblas_x86_64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_x86_64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
+          curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
+          echo "here1"
+          ls -l
+          echo "here2"
           docker exec -i openblas_x86_64 sh -c "ls -l"
+          echo "here3"
           echo "halo"
           docker exec -i openblas_x86_64 sh -c "pwd"
           echo "halo2"
