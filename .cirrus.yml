@@ -4,6 +4,7 @@ compile_ob_macos_task:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     MACOSX_DEPLOYMENT_TARGET: "11.0"
+    CIRRUS_BUILD_ID: "0.3.21"
   compile_script:
     - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
     - tar -xzf OpenBLAS-0.3.21.tar.gz
