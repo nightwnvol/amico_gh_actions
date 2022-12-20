@@ -21,7 +21,6 @@ jobs:
           docker exec -i openblas_aarch64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
           docker exec -i openblas_aarch64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
           docker exec -i openblas_aarch64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS"
-          docker exec -i openblas_aarch64 sh -c "tar -czf OpenBLAS.tar.gz OpenBLAS"
           docker cp openblas_aarch64:OpenBLAS .
 
       - name: Upload artifacts
