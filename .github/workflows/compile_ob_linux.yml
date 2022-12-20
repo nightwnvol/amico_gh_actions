@@ -1,26 +1,29 @@
 name: Compile OpenBLAS on Linux
-on: push
+on: workflow_dispatch
 jobs:
-  OpenBLAS_macos_x86_64:
-    name: Linux amd64
+  OpenBLAS_linux:
+  strategy:
+      matrix:
+        arch:
+          - [x86_64, manylinux2014_x86_64, HASWELL, amd64]
+          - [aarch64, manylinux2014_aarch64, ARMV8, arm64]
+    name: Linux ${{ matrix.arch[0] }}
     runs-on: ubuntu-20.04
+    timeout-minutes: 600
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: amd64 # TODO make matrix and change also down in docker create
+          platforms: ${{ matrix.arch[3] }} # TODO make matrix and change also down in docker create
       
       - name: Run Docker
         run: |
-          docker create --name=openblas_x86_64 -i --volume=/:/host quay.io/pypa/manylinux2014_x86_64:latest /bin/bash
-          docker start openblas_x86_64
-          docker exec -i openblas_x86_64 sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_x86_64 sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
-          docker exec -i openblas_x86_64 sh -c "make -C OpenBLAS-0.3.21 TARGET=HASWELL DYNAMIC_ARCH=1"
-          docker exec -i openblas_x86_64 sh -c "make install -C OpenBLAS-0.3.21 PREFIX=/host$PWD/OpenBLAS"
-          docker exec -i openblas_x86_64 sh -c "ls -l /host$PWD"
-          echo "halo"
-          ls -l
+          docker create --name=openblas_${{ matrix.arch[0] }} -i --volume=/:/host quay.io/pypa/${{ matrix.arch[1] }}:latest /bin/bash
+          docker start openblas_${{ matrix.arch[0] }}
+          docker exec -i openblas_${{ matrix.arch[0] }} sh -c "curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_${{ matrix.arch[0] }} sh -c "tar -xzf OpenBLAS-0.3.21.tar.gz"
+          docker exec -i openblas_${{ matrix.arch[0] }} sh -c "make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[2] }} DYNAMIC_ARCH=1"
+          docker exec -i openblas_${{ matrix.arch[0] }} sh -c "make install -C OpenBLAS-0.3.21 PREFIX=/host$PWD/OpenBLAS"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
