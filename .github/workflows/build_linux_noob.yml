@@ -4,7 +4,7 @@ jobs:
   linux_wheels:
     strategy:
       matrix:
-        py: [cp37, cp38, cp39, cp310]
+        py: [cp39] # [cp37, cp38, cp39, cp310]
         arch:
           - [x86_64, manylinux_x86_64, amd64]
           - [aarch64, manylinux_aarch64, arm64]
@@ -98,8 +98,8 @@ jobs:
           CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
           CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="$(pwd)/OpenBLAS"
           CIBW_BEFORE_ALL_LINUX: >
-            unzip test/demo.zip -d test/demo
-            echo CIAO
+            unzip test/demo.zip -d test/demo &&
+            echo CIAO &&
             ls -l
       
       - name: Upload artifacts
