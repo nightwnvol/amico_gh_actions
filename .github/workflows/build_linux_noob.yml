@@ -6,8 +6,8 @@ jobs:
       matrix:
         py: [cp37, cp38, cp39, cp310]
         arch:
-          - [x86_64, manylinux_x86_64, HASWELL, amd64]
-          - [aarch64, manylinux_aarch64, ARMV8, arm64]
+          - [x86_64, manylinux_x86_64, amd64]
+          - [aarch64, manylinux_aarch64, arm64]
     name: Linux wheels
     runs-on: ubuntu-20.04
     steps:
@@ -87,7 +87,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: ${{ matrix.arch[3] }}
+          platforms: ${{ matrix.arch[2] }}
 
       - name: Build wheel (${{ matrix.arch[0] }}, ${{ matrix.py }})
         # continue-on-error: true # TODO false
