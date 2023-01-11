@@ -99,6 +99,8 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="$(pwd)/OpenBLAS"
           CIBW_BEFORE_ALL_LINUX: >
             unzip test/demo.zip -d test/demo
+            echo CIAO
+            ls -l
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
