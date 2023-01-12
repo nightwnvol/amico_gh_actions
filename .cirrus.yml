@@ -42,7 +42,7 @@ build_macos_wheels_task:
     - brew install p7zip
     - brew install python@${PY}
   download_compiled_openblas_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/5014450319654912/compile_OpenBLAS_macos/compiled_openblas/OpenBLAS_macos_arm64.zip
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/5631624100970496/compile_OpenBLAS_macos/compiled_openblas/OpenBLAS_macos_arm64.zip
     - ls -l
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   install_cibuildwheel_script:
