@@ -45,14 +45,13 @@ build_macos_wheels_task:
     - brew install python@${PY}
   download_compiled_OpenBLAS_script:
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/6521300806533120/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
-    - ls -l
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   install_cibuildwheel_script:
     - python${PY} -m pip install cibuildwheel==2.11.2
   run_cibuildwheel_script:
     - cibuildwheel # TODO add platform
-  wheels_artifacts:
-    path: 'wheelhouse/*.whl' # return zip as in GitHub?
+  wheels_macos_arm64_artifacts:
+    path: './wheelhouse/*.whl' # return zip as in GitHub?
 
 # macos_arm64_wheels_task:
 #   name: MacOS (arm64) wheels
