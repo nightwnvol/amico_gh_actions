@@ -3,9 +3,6 @@ compile_OpenBLAS_macos_task:
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
-  matrix:
-    - env:
-      ARCH: "arm64"
   env:
     MACOSX_DEPLOYMENT_TARGET: "11.0"
   compile_OpenBLAS_script:
@@ -14,9 +11,9 @@ compile_OpenBLAS_macos_task:
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
     - brew install p7zip
-    - 7z a OpenBLAS_macos_${ARCH}.zip ./OpenBLAS/*
+    - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
   compiled_openblas_artifacts:
-    path: 'OpenBLAS_macos_${ARCH}.zip'
+    path: 'OpenBLAS_macos_arm64.zip'
 
 build_macos_wheels_task:
   name: Build MacOS wheels
