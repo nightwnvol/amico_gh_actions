@@ -51,7 +51,7 @@ build_macos_wheels_task:
   run_cibuildwheel_script:
     - cibuildwheel # TODO add platform
   wheels_macos_arm64_artifacts:
-    path: './wheelhouse/*.whl' # return zip as in GitHub?
+    path: './wheelhouse/**.whl'
 
 # macos_arm64_wheels_task:
 #   name: MacOS (arm64) wheels
