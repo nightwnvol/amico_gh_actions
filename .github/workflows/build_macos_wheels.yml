@@ -56,7 +56,7 @@ jobs:
           # will download all artifacts if not specified
           # and extract them into respective subdirectories
           # https://github.com/actions/download-artifact#download-all-artifacts
-          name: OpenBLAS_${{ matrix.arch[0] }}
+          name: OpenBLAS_macos_${{ matrix.arch[0] }}
 
           # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: OpenBLAS
