@@ -3,17 +3,20 @@ compile_OpenBLAS_macos_task:
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
+  matrix:
+    - env:
+      ARCH: "arm64"
   env:
     MACOSX_DEPLOYMENT_TARGET: "11.0"
-  compile_script:
+  compile_OpenBLAS_script:
     - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
     - brew install p7zip
-    - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
+    - 7z a OpenBLAS_macos_${ARCH}.zip ./OpenBLAS/*
   compiled_openblas_artifacts:
-    path: 'OpenBLAS_macos_arm64.zip'
+    path: 'OpenBLAS_macos_${ARCH}.zip'
 
 build_macos_wheels_task:
   name: Build MacOS wheels
@@ -39,7 +42,7 @@ build_macos_wheels_task:
     CIBW_BEFORE_ALL_MACOS: >
       7z x test/demo.zip -o"test/demo"
   download_compiled_openblas_artifact_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/4698609799659520/compile_ob_macos/compiled_openblas/OpenBLAS_macos_arm64.zip
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/6154625456275456/compile_OpenBLAS_macos/compiled_openblas/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   install_pre_requirements_script:
     - brew install p7zip
