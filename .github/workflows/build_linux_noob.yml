@@ -51,13 +51,13 @@ jobs:
           # run_id: 1122334455
 
           # Optional, run number from the workflow
-          run_number: 37
+          run_number: 38
 
           # Optional, uploaded artifact name,
           # will download all artifacts if not specified
           # and extract them into respective subdirectories
           # https://github.com/actions/download-artifact#download-all-artifacts
-          name: OpenBLAS
+          name: OpenBLAS_${{ matrix.arch[0] }}
 
           # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: OpenBLAS
