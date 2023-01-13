@@ -1,0 +1,19 @@
+name: Download MacOS arm64 wheels
+on:
+  repository_dispatch:
+    types: [test_download]
+jobs:
+  download_wheels:
+    name: arm64
+    if: ${{ github.event.client_payload.passed }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download from Cirrus CI
+        run: |
+          echo OK
+      
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: wheels_macos_arm64
+      #     path: ./wheelhouse/*.whl
