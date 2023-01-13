@@ -10,14 +10,14 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          curl -L -o ${{ github.event.client_payload.filename }} https://api.cirrus-ci.com/v1/artifact/build/4562732133908480/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/${{ github.event.client_payload.filename[0] }}
-          curl -L -o ${{ github.event.client_payload.filename }} https://api.cirrus-ci.com/v1/artifact/build/4562732133908480/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/${{ github.event.client_payload.filename[1] }}
-          curl -L -o ${{ github.event.client_payload.filename }} https://api.cirrus-ci.com/v1/artifact/build/4562732133908480/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/${{ github.event.client_payload.filename[2] }}
+          curl -L -o ${{ github.event.client_payload.filenames[0] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/wheels/wheelhouse/${{ github.event.client_payload.filenames[0] }}
+          curl -L -o ${{ github.event.client_payload.filenames[1] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/wheels/wheelhouse/${{ github.event.client_payload.filenames[1] }}
+          curl -L -o ${{ github.event.client_payload.filenames[2] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/wheels/wheelhouse/${{ github.event.client_payload.filenames[2] }}
           ls -l
           mkdir wheelhouse
-          mv ${{ github.event.client_payload.filename[0] }} wheelhouse/
-          mv ${{ github.event.client_payload.filename[1] }} wheelhouse/
-          mv ${{ github.event.client_payload.filename[2] }} wheelhouse/
+          mv ${{ github.event.client_payload.filenames[0] }} wheelhouse/
+          mv ${{ github.event.client_payload.filenames[1] }} wheelhouse/
+          mv ${{ github.event.client_payload.filenames[2] }} wheelhouse/
           ls -l wheelhouse
       
       - name: Upload artifacts
