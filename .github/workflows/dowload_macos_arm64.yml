@@ -6,7 +6,7 @@ on:
     types: [test_download] # TODO change name
 jobs:
   download_wheels:
-    name: arm64 # TODO change name? see other jobs
+    name: arm64 # TODO change name?
     if: ${{ github.event.client_payload.passed }}
     runs-on: ubuntu-20.04
     steps:
@@ -22,9 +22,8 @@ jobs:
       - name: Download from Cirrus CI
         run: |
           mkdir wheelhouse
-          for i in {0..${{ github.event.client_payload.n_files }}};
-          do curl -L -o ./wheelhouse/${{ github.event.client_payload.filenames[\$i] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[\$i] }};
-          done
+          curl -L -o wheelhouse.zip https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels/wheelhouse.zip
+          unzip wheelhouse.zip -d wheelhouse
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
