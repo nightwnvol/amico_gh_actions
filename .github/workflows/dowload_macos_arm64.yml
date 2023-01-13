@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          curl -L -o ${{ github.event.client_payload.filename }} https://api.cirrus-ci.com/v1/artifact/build/${{ github.event.client_payload.build }}/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/${{ github.event.client_payload.filename }}
+          curl -L -o ${{ github.event.client_payload.filename }} https://api.cirrus-ci.com/v1/artifact/build/4562732133908480/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/${{ github.event.client_payload.filename }}
           ls -l
           mkdir wheelhouse
           mv ${{ github.event.client_payload.filename }} wheelhouse/
