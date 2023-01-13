@@ -17,6 +17,25 @@ compile_OpenBLAS_macos_task:
   compiled_OpenBLAS_artifacts:
     path: 'OpenBLAS_macos_arm64.zip'
 
+compile_no_clone_task:
+  trigger_type: manual
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-monterey-xcode
+  env:
+    MACOSX_DEPLOYMENT_TARGET: "11.0"
+  clone_script:
+    - echo SKIP CLONE
+  install_requirements_script:
+    - brew install p7zip
+  compile_OpenBLAS_arm64_script:
+    - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
+    - tar -xzf OpenBLAS-0.3.21.tar.gz
+    - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
+    - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
+    - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
+  compiled_OpenBLAS_artifacts:
+    path: 'OpenBLAS_macos_arm64.zip'
+
 build_macos_wheels_task:
   name: Build MacOS wheels
   trigger_type: manual
@@ -44,14 +63,14 @@ build_macos_wheels_task:
     - brew install p7zip
     - brew install python@${PY}
   download_compiled_OpenBLAS_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/4925916816605184/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=test
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/4925916816605184/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   install_cibuildwheel_script:
     - python${PY} -m pip install cibuildwheel==2.11.2
   run_cibuildwheel_script:
     - cibuildwheel
   wheels_macos_arm64_artifacts:
-    path: './wheelhouse/*.whl'
+    path: './wheelhouse/*.whl' # TODO gh ation to download this? send a trigger?
 
 # macos_arm64_wheels_task:
 #   name: MacOS (arm64) wheels
