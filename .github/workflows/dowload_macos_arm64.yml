@@ -10,10 +10,14 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          echo OK
+          curl -L -o dmri_amico-2.0.0-cp39-cp39-macosx_11_0_arm64.whl https://api.cirrus-ci.com/v1/artifact/build/4562732133908480/Build%20MacOS%20wheels/wheels_macos_arm64/wheelhouse/dmri_amico-2.0.0-cp39-cp39-macosx_11_0_arm64.whl
+          ls -l
+          mkdir wheelhouse
+          mv dmri_amico-2.0.0-cp39-cp39-macosx_11_0_arm64.whl wheelhouse/
+          ls -l wheelhouse
       
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: wheels_macos_arm64
-      #     path: ./wheelhouse/*.whl
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels_macos_arm64
+          path: ./wheelhouse/*.whl
