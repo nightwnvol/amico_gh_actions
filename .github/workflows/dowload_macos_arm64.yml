@@ -10,9 +10,9 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          curl -L -o ${{ github.event.client_payload.filenames[0] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20(arm64)%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[0] }}
-          curl -L -o ${{ github.event.client_payload.filenames[1] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20(arm64)%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[1] }}
-          curl -L -o ${{ github.event.client_payload.filenames[2] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20(arm64)%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[2] }}
+          curl -L -o ${{ github.event.client_payload.filenames[0] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[0] }}
+          curl -L -o ${{ github.event.client_payload.filenames[1] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[1] }}
+          curl -L -o ${{ github.event.client_payload.filenames[2] }} https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels/wheelhouse/${{ github.event.client_payload.filenames[2] }}
           ls -l
           mkdir wheelhouse
           mv ${{ github.event.client_payload.filenames[0] }} wheelhouse/
