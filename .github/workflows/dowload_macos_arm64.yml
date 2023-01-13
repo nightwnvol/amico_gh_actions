@@ -10,11 +10,12 @@ jobs:
     if: ${{ github.event.client_payload.passed }}
     runs-on: ubuntu-20.04
     steps:
-      # TODO github.event.client_payload.build_id
+      # NOTE curl -L -o wheels.zip https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels.zip
+      # NOTE use alias??
       - name: Download from Cirrus CI
         run: |
-          curl -L -o wheels.zip https://api.cirrus-ci.com/v1/artifact/build/5438263297572864/MacOS%20%28arm64%29%20wheels%20no%20OpenBLAS/wheels.zip
-          unzip wheels.zip
+          curl -L -o wheels_macos_arm64.zip https://api.cirrus-ci.com/v1/artifact/build/${{ github.event.client_payload.build_id }}/Build%20MacOS%20wheels/wheels_macos_arm64.zip
+          unzip wheels_macos_arm64.zip
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
