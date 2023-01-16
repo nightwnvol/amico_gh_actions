@@ -1,10 +1,11 @@
 # TODO put this in build_macos_wheels.yml -> NOT POSSIBLE
 
 name: Download MacOS arm64 wheels
-on: workflow_dispatch
-  inputs:
-    passed: false
-    build_id: 0
+on:
+  workflow_dispatch:
+    inputs:
+      passed: false
+      build_id: 0
   # repository_dispatch:
   #   types: [test_download] # TODO change name
 jobs:
