@@ -1,5 +1,6 @@
 name: Build Linux wheels
-on: workflow_dispatch
+# on: workflow_dispatch
+on: push
 jobs:
   build_wheels:
     strategy:

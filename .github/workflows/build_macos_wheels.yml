@@ -1,5 +1,6 @@
 name: Build MacOS wheels
-on: workflow_dispatch
+# on: workflow_dispatch
+on: push
 jobs:
   build_wheels:
     strategy:
@@ -12,6 +13,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Download compiled OpenBLAS
+        # id: dowload-openblas-artifact
+        run: |
+          curl -L -o OpenBLAS_macos_${{ matrix.arch[0] }}.zip -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.TEST_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/artifacts/${{ vars.OB_MACOS }}/zip
+          7z x OpenBLAS_macos_${{ matrix.arch[0] }}.zip -o"OpenBLAS"
+
+      - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
+        # continue-on-error: true # TODO false
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_PLATFORM: macos
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
+          CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="$(pwd)/OpenBLAS"
+          CIBW_BEFORE_ALL_MACOS: >
+            7z x test/demo.zip -o"test/demo"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels_macos_${{ matrix.arch[0] }}
+          path: ./wheelhouse/*.whl
 
       # - name: Download compiled OpenBLAS
       #   id: dowload-openblas-artifact
@@ -82,26 +106,3 @@ jobs:
       #     #  "fail", "warn", "ignore"
       #     # default fail
       #     if_no_artifact_found: fail
-
-      - name: Download compiled OpenBLAS
-        id: dowload-openblas-artifact
-        run: |
-          curl -L -o OpenBLAS_macos_${{ matrix.arch[0] }}.zip -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.TEST_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/artifacts/${{ vars.OB_ARTIFACT_ID }}/zip
-          7z x OpenBLAS_macos_${{ matrix.arch[0] }}.zip -o"OpenBLAS"
-
-      - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
-        # continue-on-error: true # TODO false
-        uses: pypa/cibuildwheel@v2.11.2
-        env:
-          CIBW_PLATFORM: macos
-          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
-          CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="$(pwd)/OpenBLAS"
-          CIBW_BEFORE_ALL_MACOS: >
-            7z x test/demo.zip -o"test/demo"
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels_macos_${{ matrix.arch[0] }}
-          path: ./wheelhouse/*.whl
