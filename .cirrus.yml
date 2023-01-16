@@ -58,7 +58,8 @@ build_macos_wheels_task:
 
 trigger_github_task:
   name: Trigger GitHub job
-  depends_on: build_macos_wheels
+  # depends_on: build_macos_wheels
+  trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
