@@ -31,7 +31,7 @@ jobs:
           echo CIAO1
           ls -l
           echo CIAO2
-          docker create --name=openblas_${{ matrix.arch[0] }} -i --volume=/:/host quay.io/pypa/${{ matrix.arch[1] }}:latest /bin/bash
+          docker create --name=openblas_${{ matrix.arch[0] }} -i --volume=$PWD:/host quay.io/pypa/${{ matrix.arch[1] }}:latest /bin/bash
           docker start openblas_${{ matrix.arch[0] }}
           echo CIAO3
           docker exec -i openblas_${{ matrix.arch[0] }} sh -c "ls -l"
