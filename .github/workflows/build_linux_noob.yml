@@ -1,6 +1,5 @@
 name: Build Linux wheels
-# on: workflow_dispatch
-on: push
+on: workflow_dispatch
 jobs:
   build_wheels:
     strategy:
@@ -33,7 +32,6 @@ jobs:
           platforms: ${{ matrix.arch[2] }}
 
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
-        # continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_PLATFORM: linux

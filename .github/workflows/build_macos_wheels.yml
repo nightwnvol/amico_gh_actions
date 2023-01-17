@@ -1,6 +1,5 @@
 name: Build MacOS wheels
-# on: workflow_dispatch
-on: push
+on: workflow_dispatch
 jobs:
   build_wheels:
     strategy:
@@ -15,13 +14,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download compiled OpenBLAS
-        # id: dowload-openblas-artifact
         run: |
           curl -L -o OpenBLAS_macos_${{ matrix.arch[0] }}.zip -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.TEST_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/artifacts/${{ vars.OB_MACOS }}/zip
           7z x OpenBLAS_macos_${{ matrix.arch[0] }}.zip -o"OpenBLAS"
 
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
-        # continue-on-error: true # TODO false
         uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_PLATFORM: macos
@@ -36,73 +33,3 @@ jobs:
         with:
           name: wheels_macos_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
-
-      # - name: Download compiled OpenBLAS
-      #   id: dowload-openblas-artifact
-      #   uses: dawidd6/action-download-artifact@v2
-      #   with:
-      #     # Optional, GitHub token, a Personal Access Token with `public_repo` scope if needed
-      #     # Required, if the artifact is from a different repo
-      #     # Required, if the repo is private a Personal Access Token with `repo` scope is needed
-      #     # github_token: ${{secrets.GITHUB_TOKEN}}
-
-      #     # Optional, workflow file name or ID
-      #     # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
-      #     workflow: compile_OpenBLAS_macos.yml
-
-      #     # Optional, the status or conclusion of a completed workflow to search for
-      #     # Can be one of a workflow conclusion:
-      #     #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
-      #     # Or a workflow status:
-      #     #   "completed", "in_progress", "queued"
-      #     # Use the empty string ("") to ignore status or conclusion in the search
-      #     workflow_conclusion: success
-
-      #     # Optional, will get head commit SHA
-      #     # pr: ${{github.event.pull_request.number}}
-
-      #     # Optional, no need to specify if PR is
-      #     commit: ${{github.event.pull_request.head.sha}}
-
-      #     # Optional, will use the specified branch. Defaults to all branches
-      #     branch: main
-
-      #     # Optional, defaults to all types
-      #     # event: push
-
-      #     # Optional, will use specified workflow run
-      #     # run_id: 1122334455
-
-      #     # Optional, run number from the workflow
-      #     run_number: 2 # TODO github variable?
-
-      #     # Optional, uploaded artifact name,
-      #     # will download all artifacts if not specified
-      #     # and extract them into respective subdirectories
-      #     # https://github.com/actions/download-artifact#download-all-artifacts
-      #     name: OpenBLAS_macos_${{ matrix.arch[0] }}
-
-      #     # Optional, a directory where to extract artifact(s), defaults to the current directory
-      #     path: OpenBLAS
-
-      #     # Optional, defaults to current repo
-      #     # repo: ${{ github.repository }}
-
-      #     # Optional, check the workflow run to whether it has an artifact
-      #     # then will get the last available artifact from the previous workflow
-      #     # default false, just try to download from the last one
-      #     # check_artifacts:  false
-
-      #     # Optional, search for the last workflow run whose stored an artifact named as in `name` input
-      #     # default false
-      #     # search_artifacts: false
-
-      #     # Optional, choose to skip unpacking the downloaded artifact(s)
-      #     # default false
-      #     # skip_unpack: false
-
-      #     # Optional, choose how to exit the action if no artifact is found
-      #     # can be one of:
-      #     #  "fail", "warn", "ignore"
-      #     # default fail
-      #     if_no_artifact_found: fail
