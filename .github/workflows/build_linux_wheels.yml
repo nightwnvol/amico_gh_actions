@@ -1,0 +1,48 @@
+name: Build Linux wheels
+on: workflow_dispatch
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        py: [cp37, cp38, cp39, cp310]
+        arch:
+          - [x86_64, manylinux_x86_64, amd64]
+          - [aarch64, manylinux_aarch64, arm64]
+    name: ${{ matrix.py }}-${{ matrix.arch[1] }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download compiled OpenBLAS (x86_64)
+        if: ${{ matrix.arch[0] == 'x86_64' }}
+        run: |
+          curl -L -o OpenBLAS_macos_${{ matrix.arch[0] }}.zip -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.TEST_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/artifacts/${{ vars.OB_X86_64 }}/zip
+          7z x OpenBLAS_macos_${{ matrix.arch[0] }}.zip -o"OpenBLAS"
+
+      - name: Download compiled OpenBLAS (aarch64)
+        if: ${{ matrix.arch[0] == 'aarch64' }}
+        run: |
+          curl -L -o OpenBLAS_macos_${{ matrix.arch[0] }}.zip -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.TEST_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/artifacts/${{ vars.OB_AARCH64 }}/zip
+          7z x OpenBLAS_macos_${{ matrix.arch[0] }}.zip -o"OpenBLAS"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: ${{ matrix.arch[2] }}
+
+      - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
+        uses: pypa/cibuildwheel@v2.12.0
+        env:
+          CIBW_PLATFORM: linux
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
+          CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
+          CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="$(pwd)/OpenBLAS"
+          CIBW_BEFORE_ALL_LINUX: >
+            unzip test/demo.zip -d test/demo
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels_linux_${{ matrix.arch[0] }}
+          path: ./wheelhouse/*.whl

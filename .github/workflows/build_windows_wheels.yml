@@ -1,0 +1,43 @@
+name: Build Windows wheels
+on: workflow_dispatch
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        py: [cp37, cp38, cp39, cp310]
+        arch:
+          - [AMD64, win_amd64]
+          - [x86, win32]
+    name: ${{ matrix.py }}-${{ matrix.arch[1] }}
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download compiled OpenBLAS (AMD64)
+        if: ${{ matrix.arch[0] == 'AMD64' }}
+        run: |
+          curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x64.zip
+          7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
+
+      - name: Download compiled OpenBLAS (x86)
+        if: ${{ matrix.arch[0] == 'x86' }}
+        run: |
+          curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x86.zip
+          7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
+
+      - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
+        uses: pypa/cibuildwheel@v2.12.0
+        env:
+          CIBW_PLATFORM: windows
+          CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
+          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$PWD\\OpenBLAS
+          CIBW_BEFORE_ALL_WINDOWS: >
+            7z x test/demo.zip -o"test/demo"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels_windows_${{ matrix.arch[0] }}
+          path: ./wheelhouse/*.whl
