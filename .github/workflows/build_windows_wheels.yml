@@ -32,10 +32,11 @@ jobs:
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$(pwd)\\OpenBLAS
+          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$(pwd)\\OpenBLAS"
           CIBW_BEFORE_ALL_WINDOWS: >
             dir &&
             dir OpenBLAS &&
+            echo $env:OPENBLAS_DIR &&
             7z x test/demo.zip -o"test/demo"
       
       - name: Upload artifacts
