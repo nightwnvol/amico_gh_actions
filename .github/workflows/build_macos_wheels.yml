@@ -4,7 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp37, cp38, cp39, cp310]
+        py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [x86_64, macosx_x86_64]
     name: ${{ matrix.py }}-${{ matrix.arch[1] }}

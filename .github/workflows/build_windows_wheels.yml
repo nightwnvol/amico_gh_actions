@@ -4,7 +4,7 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        py: [cp37, cp38, cp39, cp310]
+        py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [AMD64, win_amd64]
           - [x86, win32]
