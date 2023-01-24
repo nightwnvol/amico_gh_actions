@@ -18,13 +18,11 @@ jobs:
         if: ${{ matrix.arch[0] == 'AMD64' }}
         run: |
           curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x64.zip
-          7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
 
       - name: Download compiled OpenBLAS (x86)
         if: ${{ matrix.arch[0] == 'x86' }}
         run: |
           curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x86.zip
-          7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
 
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
@@ -34,6 +32,7 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
           CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$PWD\\OpenBLAS
           CIBW_BEFORE_ALL_WINDOWS: >
+            7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
             7z x test/demo.zip -o"test/demo"
       
       - name: Upload artifacts
