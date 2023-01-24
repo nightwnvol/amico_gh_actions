@@ -62,7 +62,7 @@ trigger_github_task:
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
-    DOWNLOAD_TOKEN: ENCRYPTED[fd4ab453b7fbdfcf78e6b200110c5eccee549f9d0d14d151ab3e69ce75640b143501063ff3f9fc0135490a0627fde744]
+    DOWNLOAD_TOKEN: ENCRYPTED[e995b6ed59fdf014531f0203c0a552c698602897f3a18840896ffbfae03c6491700eea4f73c9fcd972b35b86edc5f573]
   clone_script:
     - echo SKIP
   # TODO view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
