@@ -1,0 +1,11 @@
+name: Test
+on: workflow_dispatch
+jobs:
+  test:
+    runs-on: windows-2019
+    steps:
+      - name: Test env
+        env:
+          TVAR: $(pwd)/OpenBLAS
+        run: |
+          echo %TVAR%
