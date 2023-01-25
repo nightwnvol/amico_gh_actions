@@ -9,4 +9,4 @@ jobs:
           TVAR: "$(pwd)/OpenBLAS"
         shell: bash
         run: |
-          echo %TVAR%
+          echo $TVAR
