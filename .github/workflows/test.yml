@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Test env
         env:
-          TVAR: $(pwd)/OpenBLAS
+          TVAR: "$(pwd)/OpenBLAS"
         shell: cmd
         run: |
           echo %TVAR%
