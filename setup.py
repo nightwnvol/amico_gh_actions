@@ -15,7 +15,7 @@ include_dirs.extend(cyspams.get_include())
 # OpenBLAS library (cyspams requirement)
 try:
       openblas_dir = os.environ['OPENBLAS_DIR']
-      print('openblas_dir', openblas_dir)
+      print('AMICO openblas_dir:', openblas_dir)
 except KeyError as err:
       print(f"\033[31mKeyError: cannot find the {err} env variable\033[0m")
       exit(1)
