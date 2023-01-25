@@ -24,7 +24,7 @@ jobs:
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="$(pwd)/OpenBLAS"
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="${GITHUB_WORKSPACE}/OpenBLAS"
           CIBW_BEFORE_ALL_MACOS: >
             7z x test/demo.zip -o"test/demo"
       
