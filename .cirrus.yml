@@ -15,7 +15,7 @@ compile_OpenBLAS_macos_task:
     - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
-    - make install -C OpenBLAS-0.3.21 PREFIX=$(pwd)/OpenBLAS
+    - make install -C OpenBLAS-0.3.21 PREFIX=${CIRRUS_WORKING_DIR}/OpenBLAS
     - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
   compiled_OpenBLAS_artifacts:
     path: 'OpenBLAS_macos_arm64.zip'
@@ -41,9 +41,11 @@ build_macos_wheels_task:
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
-    CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="$(pwd)/OpenBLAS"
+    CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="${CIRRUS_WORKING_DIR}/OpenBLAS"
     CIBW_BEFORE_ALL_MACOS: >
-      7z x test/demo.zip -o"test/demo"
+      7z x test/demo.zip -o"test/demo" &&
+      echo HERE &&
+      echo $OPENBLAS_DIR
   install_requirements_script:
     - brew install p7zip
     - brew install python@${PY}
@@ -62,7 +64,7 @@ trigger_github_task:
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
-    DOWNLOAD_TOKEN: ENCRYPTED[e995b6ed59fdf014531f0203c0a552c698602897f3a18840896ffbfae03c6491700eea4f73c9fcd972b35b86edc5f573]
+    DOWNLOAD_TOKEN: ENCRYPTED[22de4dd2ff17159cb7509969d25febff57174006f81db7b28d8769f3b946b2c9f9378fda845e3fd95eda9f8bd465d345] # TODO put this on env variables
   clone_script:
     - echo SKIP
   # TODO view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
