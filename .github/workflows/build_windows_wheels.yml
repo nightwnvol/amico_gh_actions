@@ -34,9 +34,6 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
           CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR=$PWD\OpenBLAS
           CIBW_BEFORE_ALL_WINDOWS: >
-            dir &&
-            dir OpenBLAS &&
-            echo $env:OPENBLAS_DIR &&
             7z x test/demo.zip -o"test/demo"
       
       - name: Upload artifacts
