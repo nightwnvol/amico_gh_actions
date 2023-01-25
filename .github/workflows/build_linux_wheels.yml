@@ -37,7 +37,7 @@ jobs:
           CIBW_PLATFORM: linux
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="$(pwd)/OpenBLAS"
+          CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR="${GITHUB_WORKSPACE}/OpenBLAS"
           CIBW_BEFORE_ALL_LINUX: >
             unzip test/demo.zip -d test/demo
 
