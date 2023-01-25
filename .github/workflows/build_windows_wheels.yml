@@ -36,7 +36,8 @@ jobs:
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
             echo HERE &&
-            echo %OPENBLAS_DIR%
+            echo %OPENBLAS_DIR% && 
+            echo %PATH%
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
