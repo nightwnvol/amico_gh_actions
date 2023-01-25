@@ -17,7 +17,7 @@ jobs:
           tar -xzf OpenBLAS-0.3.21.tar.gz
           sudo ln -fs /usr/local/bin/gfortran-11 /usr/local/bin/gfortran
           make -C OpenBLAS-0.3.21 TARGET=${{ matrix.arch[1] }} DYNAMIC_ARCH=1
-          make install -C OpenBLAS-0.3.21 PREFIX=$PWD/OpenBLAS
+          make install -C OpenBLAS-0.3.21 PREFIX=${GITHUB_WORKSPACE}/OpenBLAS
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
