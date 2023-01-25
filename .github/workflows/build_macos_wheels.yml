@@ -26,7 +26,9 @@ jobs:
           CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="${GITHUB_WORKSPACE}/OpenBLAS"
           CIBW_BEFORE_ALL_MACOS: >
-            7z x test/demo.zip -o"test/demo"
+            7z x test/demo.zip -o"test/demo" &&
+            echo HERE &&
+            echo $OPENBLAS_DIR
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
