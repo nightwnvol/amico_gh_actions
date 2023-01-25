@@ -3,6 +3,7 @@ from Cython.Build import cythonize
 import cyspams
 import sys
 import os
+import pathlib
 
 include_dirs = []
 libraries = []
@@ -15,6 +16,9 @@ include_dirs.extend(cyspams.get_include())
 # OpenBLAS library (cyspams requirement)
 try:
       openblas_dir = os.environ['OPENBLAS_DIR']
+      if sys.platform.startswith('win32') and openblas_dir.startswith('/'):
+            openblas_dir = openblas_dir[1] + ':' + openblas_dir[2:]
+            openblas_dir.replace('/', '\\')
       print('AMICO openblas_dir:', openblas_dir)
 except KeyError as err:
       print(f"\033[31mKeyError: cannot find the {err} env variable\033[0m")
