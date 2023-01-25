@@ -15,7 +15,7 @@ include_dirs.extend(cyspams.get_include())
 # OpenBLAS library (cyspams requirement)
 try:
       openblas_dir = os.environ['OPENBLAS_DIR']
-      if sys.platform.startswith('win32') and openblas_dir.startswith('/'):
+      if sys.platform.startswith('win32') and openblas_dir.startswith('/'): # NOTE this is a workaround for the $(pwd) shell command in cibuildwheel
             openblas_dir = openblas_dir[1] + ':' + openblas_dir[2:]
       print('AMICO openblas_dir:', openblas_dir)
 except KeyError as err:
