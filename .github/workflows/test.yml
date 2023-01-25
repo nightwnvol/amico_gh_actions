@@ -7,6 +7,5 @@ jobs:
       - name: Test env
         env:
           TVAR: $(pwd)/OpenBLAS
-        shell: bash
         run: |
-          echo $TVAR
+          echo $env:TVAR
