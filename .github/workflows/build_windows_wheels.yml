@@ -32,9 +32,11 @@ jobs:
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="${GITHUB_WORKSPACE}\\OpenBLAS"
+          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$PWD\\OpenBLAS"
           CIBW_BEFORE_ALL_WINDOWS: >
-            7z x test/demo.zip -o"test/demo"
+            7z x test/demo.zip -o"test/demo" &&
+            echo HERE &&
+            echo %OPENBLAS_DIR%
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
