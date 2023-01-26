@@ -15,8 +15,6 @@ include_dirs.extend(cyspams.get_include())
 # OpenBLAS library (cyspams requirement)
 try:
       openblas_dir = os.environ['OPENBLAS_DIR']
-      # if sys.platform.startswith('win32') and openblas_dir.startswith('/'): # NOTE this is a workaround for the $(pwd) shell command in cibuildwheel
-      #       openblas_dir = openblas_dir[1] + ':' + openblas_dir[2:]
       print('AMICO openblas_dir:', openblas_dir)
 except KeyError as err:
       print(f"\033[31mKeyError: cannot find the {err} env variable\033[0m")
@@ -26,19 +24,13 @@ include_dirs.extend([openblas_dir+'/include'])
 library_dirs.extend([openblas_dir+'/lib'])
 
 if sys.platform.startswith('win32'):
-      # include_dirs.extend([openblas_dir+'/include'])
       libraries.extend(['libopenblas']) # .lib filenames
-      # library_dirs.extend([openblas_dir+'/lib'])
       extra_compile_args.extend(['/std:c++14'])
 if sys.platform.startswith('linux'):
-      # include_dirs.extend([openblas_dir])
       libraries.extend(['stdc++', 'openblas']) # library names (not filenames)
-      # library_dirs.extend([openblas_dir])
       extra_compile_args.extend(['-std=c++14'])
 if sys.platform.startswith('darwin'):
-      # include_dirs.extend([openblas_dir])
       libraries.extend(['stdc++', 'openblas']) # library names (not filenames)
-      # library_dirs.extend([openblas_dir])
       extra_compile_args.extend(['-std=c++14'])
 
 extensions = [
