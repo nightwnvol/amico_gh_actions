@@ -29,10 +29,11 @@ jobs:
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
         env:
+          OPENBLAS_DIR: ${GITHUB_WORKSPACE}\OpenBLAS
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$(cd)\\OpenBLAS"
+          # CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$(cd)\\OpenBLAS"
           CIBW_BEFORE_ALL_WINDOWS: >
             7z x test/demo.zip -o"test/demo" &&
             echo HERE &&
