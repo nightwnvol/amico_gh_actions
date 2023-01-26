@@ -46,7 +46,8 @@ jobs:
             echo $PWD &&
             echo $OPENBLAS_DIR &&
             echo $OPENBLAS_DIR_TEST &&
-            echo $GITHUB_WORKSPACE
+            echo $GITHUB_WORKSPACE &&
+            ls -l /
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
