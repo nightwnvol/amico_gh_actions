@@ -50,7 +50,8 @@ jobs:
             ls -l / &&
             ls -l /home &&
             ls -l /project &&
-            ls -l /host
+            ls -l /host &&
+            ls -l /host$OPENBLAS_DIR
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
