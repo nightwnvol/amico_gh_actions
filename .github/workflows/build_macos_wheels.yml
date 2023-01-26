@@ -21,15 +21,20 @@ jobs:
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
         env:
+          MACOSX_DEPLOYMENT_TARGET: 10.9
+          OPENBLAS_DIR: ${{ github.workspace }}/OpenBLAS
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="${GITHUB_WORKSPACE}/OpenBLAS"
+          # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.9" OPENBLAS_DIR="$(pwd)/OpenBLAS"
           CIBW_BEFORE_ALL_MACOS: >
             7z x test/demo.zip -o"test/demo" &&
             echo HERE &&
-            echo $OPENBLAS_DIR
-      
+            echo $PWD &&
+            echo $OPENBLAS_DIR &&
+            echo $GITHUB_WORKSPACE &&
+            echo $MACOSX_DEPLOYMENT_TARGET
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
