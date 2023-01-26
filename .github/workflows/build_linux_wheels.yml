@@ -47,7 +47,10 @@ jobs:
             echo $OPENBLAS_DIR &&
             echo $OPENBLAS_DIR_TEST &&
             echo $GITHUB_WORKSPACE &&
-            ls -l /
+            ls -l / &&
+            ls -l /home &&
+            ls -l /project &&
+            ls -l /host
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
