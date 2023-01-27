@@ -41,9 +41,22 @@ if 'openblas' in config:
       libraries.extend([config['openblas']['libraries']])
       library_dirs.extend([config['openblas']['library_dirs']])
       include_dirs.extend([config['openblas']['include_dirs']])
+      print(f"\033[32mFound openblas section in site.cfg\033[0m")
+      print(f"\033[32mlibraries: {libraries}\033[0m")
+      print(f"\033[32mlibrary_dirs: {library_dirs}\033[0m")
+      print(f"\033[32minclude_dirs: {include_dirs}\033[0m")
 else:
       print(f"\033[31mKeyError: cannot find the openblas section in site.cfg\033[0m")
       exit(1)
+
+if sys.platform.startswith('win32'):
+      extra_compile_args.extend(['/std:c++14'])
+if sys.platform.startswith('linux'):
+      libraries.extend(['stdc++']) # library names (not filenames)
+      extra_compile_args.extend(['-std=c++14'])
+if sys.platform.startswith('darwin'):
+      libraries.extend(['stdc++']) # library names (not filenames)
+      extra_compile_args.extend(['-std=c++14'])
 
 
 extensions = [
