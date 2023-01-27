@@ -1,6 +1,7 @@
 # TODO badges
 # TODO trigger from github
 # TODO add name and alias
+# TODO remove PY from matrix
 compile_OpenBLAS_macos_task:
   trigger_type: manual
   macos_instance:
@@ -39,7 +40,7 @@ build_macos_wheels_task:
   env:
     MACOSX_DEPLOYMENT_TARGET: 11.0
     PATH: ${PATH}:/opt/homebrew/opt/python@${PY}/bin
-    OPENBLAS_DIR: ${CIRRUS_WORKING_DIR}/OpenBLAS
+    # OPENBLAS_DIR: ${CIRRUS_WORKING_DIR}/OpenBLAS
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
@@ -55,6 +56,8 @@ build_macos_wheels_task:
   download_compiled_OpenBLAS_script:
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
+  set_up_configuration_file_script:
+    - python${PY} setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
   run_cibuildwheel_script:
     - cibuildwheel
   wheels_macos_arm64_artifacts:

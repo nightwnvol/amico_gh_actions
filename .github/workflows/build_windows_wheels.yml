@@ -26,10 +26,14 @@ jobs:
           curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x86.zip
           7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
 
+      - name: Set up configuration file
+        run: |
+          python setup_config.py openblas libopenblas ${{ github.workspace }}\OpenBLAS\lib ${{ github.workspace }}\OpenBLAS\include
+
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
         env:
-          OPENBLAS_DIR: ${{ github.workspace }}\OpenBLAS
+          # OPENBLAS_DIR: ${{ github.workspace }}\OpenBLAS
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
