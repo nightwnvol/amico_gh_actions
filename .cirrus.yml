@@ -37,21 +37,23 @@ build_macos_wheels_task:
         PY: "3.10"
         CP: "310"
   env:
-    PATH: $PATH:/opt/homebrew/opt/python@${PY}/bin
+    MACOSX_DEPLOYMENT_TARGET: 11.0
+    PATH: ${PATH}:/opt/homebrew/opt/python@${PY}/bin
+    OPENBLAS_DIR: ${CIRRUS_WORKING_DIR}/OpenBLAS
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
-    CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="${CIRRUS_WORKING_DIR}/OpenBLAS"
+    # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="${CIRRUS_WORKING_DIR}/OpenBLAS"
     CIBW_BEFORE_ALL_MACOS: >
-      7z x test/demo.zip -o"test/demo" &&
-      echo HERE &&
-      echo $OPENBLAS_DIR
+      7z x test/demo.zip -o"test/demo"
+    CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+      DYLD_LIBRARY_PATH=${CIRRUS_WORKING_DIR}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
   install_requirements_script:
     - brew install p7zip
     - brew install python@${PY}
     - python${PY} -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/$OPENBLAS_BUILD_ID/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   run_cibuildwheel_script:
     - cibuildwheel
@@ -64,7 +66,7 @@ trigger_github_task:
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
-    DOWNLOAD_TOKEN: ENCRYPTED[22de4dd2ff17159cb7509969d25febff57174006f81db7b28d8769f3b946b2c9f9378fda845e3fd95eda9f8bd465d345] # TODO put this on env variables
+    DOWNLOAD_TOKEN: ENCRYPTED[8743d705b8028a0cbb7618ef540753edbc9a67f7baae186d081ad41ffa7f8908a169c32afb4397457a21edeb596a0526] # TODO put this on env variables
   clone_script:
     - echo SKIP
   # TODO view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
