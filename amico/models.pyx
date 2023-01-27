@@ -18,6 +18,8 @@ from libc.math cimport pi, atan2, sqrt, pow as cpow
 from amico.lut cimport dir_to_lut_idx
 from cyspams.interfaces cimport nnls, lasso
 
+import concurrent.futures
+
 # WARNING this is for internal test purposes
 from pathlib import Path
 if Path(__file__).parent.resolve().joinpath('supersecret.py').exists():
