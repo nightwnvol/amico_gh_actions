@@ -47,8 +47,6 @@ jobs:
             echo "env openblas: %OPENBLAS_DIR%" &&
             echo "env openblas: ${{ github.workspace }}\OpenBLAS" &&
             delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
-          # before-build = "pip install delvewheel"
-          # repair-wheel-command = "delvewheel repair --add-path %cd%\\OpenBLAS\\bin -w {dest_dir} -v {wheel}"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
