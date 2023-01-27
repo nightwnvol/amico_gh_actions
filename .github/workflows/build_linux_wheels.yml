@@ -28,7 +28,7 @@ jobs:
 
       - name: Set up configuration file
         run: |
-          python setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+          python setup_config.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
