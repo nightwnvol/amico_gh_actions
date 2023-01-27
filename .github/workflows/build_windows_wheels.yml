@@ -45,8 +45,8 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
             echo "env openblas: ${{ env.OPENBLAS_DIR }}" &&
             echo "env openblas: %OPENBLAS_DIR%" &&
-            "env openblas: ${{ github.workspace }}\OpenBLAS" &&
-            "delvewheel repair --add-path ${{ env.OPENBLAS_DIR }}\bin -w {dest_dir} -v {wheel}"
+            echo "env openblas: ${{ github.workspace }}\OpenBLAS" &&
+            delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
           # before-build = "pip install delvewheel"
           # repair-wheel-command = "delvewheel repair --add-path %cd%\\OpenBLAS\\bin -w {dest_dir} -v {wheel}"
       
