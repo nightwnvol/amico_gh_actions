@@ -1,7 +1,5 @@
 # TODO badges
-# TODO trigger from github
 # TODO add name and alias
-# TODO remove PY from matrix
 compile_OpenBLAS_macos_task:
   trigger_type: manual
   macos_instance:
