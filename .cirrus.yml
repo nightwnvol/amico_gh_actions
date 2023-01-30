@@ -29,17 +29,14 @@ build_macos_wheels_task:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   matrix:
     - env:
-        PY: "3.8"
         CP: "38"
     - env:
-        PY: "3.9"
         CP: "39"
     - env:
-        PY: "3.10"
         CP: "310"
   env:
     MACOSX_DEPLOYMENT_TARGET: 11.0
-    PATH: ${PATH}:/opt/homebrew/opt/python@${PY}/bin
+    PATH: ${PATH}:/opt/homebrew/opt/python@3.10/bin
     # OPENBLAS_DIR: ${CIRRUS_WORKING_DIR}/OpenBLAS
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
@@ -51,13 +48,13 @@ build_macos_wheels_task:
       DYLD_LIBRARY_PATH=${CIRRUS_WORKING_DIR}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
   install_requirements_script:
     - brew install p7zip
-    - brew install python@${PY}
-    - python${PY} -m pip install cibuildwheel==2.12.0
+    - brew install python@3.10
+    - python3.10 -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
-    - python${PY} setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
+    - python3.10 setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
   run_cibuildwheel_script:
     - cibuildwheel
   wheels_macos_arm64_artifacts:
@@ -68,8 +65,8 @@ trigger_github_task:
   depends_on: build_macos_wheels
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
-  env:
-    DOWNLOAD_TOKEN: ENCRYPTED[80a1c1bc07dd0251f6ed4092ca01d3b8fcbe5dd5f2117ab8fc916882904e80ef2f53a90f9483431ab26fcadbf30ba393] # TODO put this on env variables
+  # env:
+  #   DOWNLOAD_TOKEN: ENCRYPTED[80a1c1bc07dd0251f6ed4092ca01d3b8fcbe5dd5f2117ab8fc916882904e80ef2f53a90f9483431ab26fcadbf30ba393] # TODO put this on env variables
   clone_script:
     - echo SKIP
   # TODO view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
