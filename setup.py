@@ -53,10 +53,10 @@ if sys.platform.startswith('win32'):
       extra_compile_args.extend(['/std:c++14', '/fp:fast'])
 if sys.platform.startswith('linux'):
       libraries.extend(['stdc++']) # library names (not filenames)
-      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
+      extra_compile_args.extend(['-std=c++14', '-Ofast'])
 if sys.platform.startswith('darwin'):
       libraries.extend(['stdc++']) # library names (not filenames)
-      extra_compile_args.extend(['-std=c++14', '-ffast-math'])
+      extra_compile_args.extend(['-std=c++14', '-Ofast'])
 
 
 extensions = [
