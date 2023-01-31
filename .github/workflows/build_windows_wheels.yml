@@ -33,23 +33,14 @@ jobs:
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
         env:
-          # OPENBLAS_DIR: ${{ github.workspace }}\OpenBLAS
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          # CIBW_ENVIRONMENT_WINDOWS: OPENBLAS_DIR="$(cd)\\OpenBLAS"
-          CIBW_BEFORE_ALL_WINDOWS: >
-            7z x test/demo.zip -o"test/demo" &&
-            echo HERE &&
-            echo %OPENBLAS_DIR% &&
-            echo %CD% &&
-            echo %GITHUB_WORKSPACE%
+          CIBW_BEFORE_ALL_WINDOWS: > # TODO: put it in BEFORE_TEST?
+            7z x test/demo.zip -o"test/demo"
           CIBW_BEFORE_BUILD_WINDOWS: >
             pip install delvewheel
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
-            echo "env openblas: ${{ env.OPENBLAS_DIR }}" &&
-            echo "env openblas: %OPENBLAS_DIR%" &&
-            echo "env openblas: ${{ github.workspace }}\OpenBLAS" &&
             delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
       
       - name: Upload artifacts

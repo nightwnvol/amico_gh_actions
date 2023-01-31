@@ -1,3 +1,4 @@
+# TODO: replace env var name TEST_TOKEN, OB_X86_64, OB_AARCH64
 name: Build Linux wheels
 on: workflow_dispatch
 jobs:
@@ -29,6 +30,7 @@ jobs:
       - name: Set up configuration file
         run: |
           python setup_config.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
+        # NOTE: need to add '/host' because they will be paths into a Docker container
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -38,24 +40,11 @@ jobs:
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
         env:
-          # OPENBLAS_DIR: /host${{ github.workspace }}/OpenBLAS # NOTE need to add '/host' because is executed in a container
-          # CIBW_ENVIRONMENT_PASS_LINUX: OPENBLAS_DIR
           CIBW_PLATFORM: linux
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
-          # CIBW_ENVIRONMENT_LINUX: OPENBLAS_DIR_TEST="$(pwd)/OpenBLAS"
-          CIBW_BEFORE_ALL_LINUX: >
-            unzip test/demo.zip -d test/demo &&
-            echo HERE &&
-            echo $PWD &&
-            echo $OPENBLAS_DIR &&
-            echo $OPENBLAS_DIR_TEST &&
-            echo $GITHUB_WORKSPACE &&
-            ls -l / &&
-            ls -l /home &&
-            ls -l /project &&
-            ls -l /host &&
-            ls -l $OPENBLAS_DIR
+          CIBW_BEFORE_ALL_LINUX: > # TODO: put it in BEFORE_TEST?
+            unzip test/demo.zip -d test/demo
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             LD_LIBRARY_PATH=/host${{ github.workspace }}/OpenBLAS/lib auditwheel repair -w {dest_dir} {wheel}
 

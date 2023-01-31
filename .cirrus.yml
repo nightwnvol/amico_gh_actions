@@ -1,12 +1,12 @@
-# TODO badges
-# TODO add name and alias
+# TODO: badges
+# TODO: add name and alias
 compile_OpenBLAS_macos_task:
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     MACOSX_DEPLOYMENT_TARGET: "11.0"
-  clone_script: # TODO name Clone?
+  clone_script: # TODO: name Clone?
     - echo SKIP CLONE
   install_requirements_script:
     - brew install p7zip
@@ -35,11 +35,9 @@ build_macos_wheels_task:
   env:
     MACOSX_DEPLOYMENT_TARGET: 11.0
     PATH: ${PATH}:/opt/homebrew/opt/python@3.10/bin
-    # OPENBLAS_DIR: ${CIRRUS_WORKING_DIR}/OpenBLAS
     CIBW_PLATFORM: macos
     CIBW_BUILD: cp${CP}-macosx_arm64
     CIBW_ARCHS_MACOS: arm64
-    # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="11.0" OPENBLAS_DIR="${CIRRUS_WORKING_DIR}/OpenBLAS"
     CIBW_BEFORE_ALL_MACOS: >
       7z x test/demo.zip -o"test/demo"
     CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
@@ -49,7 +47,7 @@ build_macos_wheels_task:
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip # TODO: change env var name OPENBLAS_BUILD_ID
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
     - python3.10 setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
@@ -67,6 +65,6 @@ trigger_github_task:
   #   DOWNLOAD_TOKEN: ENCRYPTED[80a1c1bc07dd0251f6ed4092ca01d3b8fcbe5dd5f2117ab8fc916882904e80ef2f53a90f9483431ab26fcadbf30ba393] # TODO put this on env variables
   clone_script:
     - echo SKIP
-  # TODO view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
+  # TODO: view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
   download_script:
     - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/dispatches -d "{\"event_type\":\"test_download\",\"client_payload\":{\"passed\":true,\"build_id\":\"$CIRRUS_BUILD_ID\"}}"
