@@ -48,3 +48,12 @@ jobs:
         with:
           name: wheels_windows_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
+
+  upload_wheels:
+  needs: build_wheels
+  name: Upload wheels test
+  runs-on: windows-2019
+  steps:
+    - name: Step 1
+      run: |
+        echo STEP 1
