@@ -18,13 +18,6 @@ from libc.math cimport pi, atan2, sqrt, pow as cpow
 from amico.lut cimport dir_to_lut_idx
 from cyspams.interfaces cimport nnls, lasso
 
-import concurrent.futures
-
-# WARNING this is for internal test purposes
-from pathlib import Path
-if Path(__file__).parent.resolve().joinpath('supersecret.py').exists():
-    from amico.supersecret import *
-
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void _compute_rmse(double [::1, :]A_view, double [::1]y_view, double [::1]x_view, double *rmse_view) nogil:
@@ -111,7 +104,7 @@ class BaseModel(ABC) :
 
 
     @abstractmethod
-    def set_solver( self, *args, **kwargs ) :
+    def set_solver( self ) :
         """For setting the parameters required by the solver to fit the model.
         NB: the parameters are model-dependent.
 
@@ -120,7 +113,7 @@ class BaseModel(ABC) :
         params : dictionary
             All the parameters that the solver will need to fit the model
         """
-        return
+        self._solver_params = {}
 
 
     @abstractmethod
@@ -183,16 +176,12 @@ class BaseModel(ABC) :
 
         Returns
         -------
-        estimates: np.ndarray
-            Scalar values eastimated in each voxel
-        rmse: np.ndarray (optional)
-            Fitting error (Root Mean Square Error)
-        nrmse: np.ndarray (optional)
-            Fitting error (Normalized Root Mean Square Error)
-        y_corrected: np.ndarray (optional)
-            Corrected DWI (only FreeWater model)
-        estimates_mod: np.ndarray (optional)
-            Modulated maps (only NODDI model)
+        results: dict of {str: np.ndarray}
+            'estimates': Scalar values eastimated in each voxel
+            'rmse': Fitting error (Root Mean Square Error) (optional)
+            'nrmse': Fitting error (Normalized Root Mean Square Error) (optional)
+            'y_corrected': Corrected DWI (only FreeWater model) (optional)
+            'estimates_mod': Modulated maps (only NODDI model) (optional)
         """
         # build chunks
         n = evaluation.y.shape[0]
@@ -208,6 +197,9 @@ class BaseModel(ABC) :
             'compute_rmse': evaluation.get_config('doComputeRMSE'),
             'compute_nrmse': evaluation.get_config('doComputeNRMSE')
         }
+
+        # fit results
+        self.results = {}
 
 
 
@@ -397,12 +389,9 @@ class CylinderZeppelinBall( BaseModel ) :
 
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 4.0 ) :
-        params = {}
-        params['mode']    = 2
-        params['pos']     = True
-        params['lambda1'] = lambda1
-        params['lambda2'] = lambda2
-        return params
+        super().set_solver()
+        self._solver_params['lambda1'] = lambda1
+        self._solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ) :
@@ -490,13 +479,15 @@ class CylinderZeppelinBall( BaseModel ) :
         super().fit(evaluation)
 
         # fit chunks in parallel
-        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
+        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
 
         # return
-        results = (np.concatenate([cr[0] for cr in chunked_results]),)
-        results += (np.concatenate([cr[1] for cr in chunked_results]),) if self.configs['compute_rmse'] else (None,)
-        results += (np.concatenate([cr[2] for cr in chunked_results]),) if self.configs['compute_nrmse'] else (None,)
-        return results
+        self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
+        if self.configs['compute_rmse']:
+            self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
+        if self.configs['compute_nrmse']:
+            self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
+        return self.results
 
 
     @cython.boundscheck(False)
@@ -599,9 +590,12 @@ class CylinderZeppelinBall( BaseModel ) :
                 if compute_nrmse:
                     _compute_nrmse(A_view, y_view[i, :], x_view, &nrmse_view[i])
 
-        results = (estimates,)
-        results += (rmse,) if compute_rmse else (None,)
-        results += (nrmse,) if compute_nrmse else (None,)
+        results = {}
+        results['estimates'] = estimates
+        if compute_rmse:
+            results['rmse'] = rmse
+        if compute_nrmse:
+            results['nrmse'] = nrmse
         return results
 
 
@@ -654,12 +648,9 @@ class NODDI( BaseModel ) :
 
 
     def set_solver( self, lambda1 = 5e-1, lambda2 = 1e-3 ):
-        params = {}
-        params['mode']    = 2
-        params['pos']     = True
-        params['lambda1'] = lambda1
-        params['lambda2'] = lambda2
-        return params
+        super().set_solver()
+        self._solver_params['lambda1'] = lambda1
+        self._solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ):
@@ -735,14 +726,17 @@ class NODDI( BaseModel ) :
         self.configs['compute_modulated_maps'] = evaluation.get_config('doSaveModulatedMaps')
 
         # fit chunks in parallel
-        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
+        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
 
         # return
-        results = (np.concatenate([cr[0] for cr in chunked_results]),)
-        results += (np.concatenate([cr[1] for cr in chunked_results]),) if self.configs['compute_rmse'] else (None,)
-        results += (np.concatenate([cr[2] for cr in chunked_results]),) if self.configs['compute_nrmse'] else (None,)
-        results += (np.concatenate([cr[3] for cr in chunked_results]),) if self.configs['compute_modulated_maps'] else (None,)
-        return results
+        self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
+        if self.configs['compute_rmse']:
+            self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
+        if self.configs['compute_nrmse']:
+            self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
+        if self.configs['compute_modulated_maps']:
+            self.results['estimates_mod'] = np.concatenate([cr['estimates_mod'] for cr in chunked_results])
+        return self.results
 
 
     @cython.boundscheck(False)
@@ -912,10 +906,14 @@ class NODDI( BaseModel ) :
                     estimates_mod_view[i, 0] = ndi * tf
                     estimates_mod_view[i, 1] = odi * tf
 
-        results = (estimates,)
-        results += (rmse,) if compute_rmse else (None,)
-        results += (nrmse,) if compute_nrmse else (None,)
-        results += (estimates_mod,) if compute_modulated_maps else (None,)
+        results = {}
+        results['estimates'] = estimates
+        if compute_rmse:
+            results['rmse'] = rmse
+        if compute_nrmse:
+            results['nrmse'] = nrmse
+        if compute_modulated_maps:
+            results['estimates_mod'] = estimates_mod
         return results
 
 
@@ -983,17 +981,14 @@ class FreeWater( BaseModel ) :
 
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 1e-3 ):
-        params = {}
-        params['mode']    = 2
-        params['pos']     = True
-        params['lambda1'] = lambda1
-        params['lambda2'] = lambda2
+        super().set_solver()
+        self._solver_params['lambda1'] = lambda1
+        self._solver_params['lambda2'] = lambda2
 
+        # TODO check this
         # need more regul for mouse data
         if self.type == 'Mouse' :
             lambda2 = 0.25
-
-        return params
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ) :
@@ -1060,14 +1055,17 @@ class FreeWater( BaseModel ) :
         self.configs['save_corrected_DWI'] = evaluation.get_config('doSaveCorrectedDWI')
 
         # fit chunks in parallel
-        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
+        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
 
         # return
-        results = (np.concatenate([cr[0] for cr in chunked_results]),)
-        results += (np.concatenate([cr[1] for cr in chunked_results]),) if self.configs['compute_rmse'] else (None,)
-        results += (np.concatenate([cr[2] for cr in chunked_results]),) if self.configs['compute_nrmse'] else (None,)
-        results += (np.concatenate([cr[3] for cr in chunked_results]),) if self.configs['save_corrected_DWI'] else (None,)
-        return results
+        self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
+        if self.configs['compute_rmse']:
+            self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
+        if self.configs['compute_nrmse']:
+            self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
+        if self.configs['save_corrected_DWI']:
+            self.results['y_corrected'] = np.concatenate([cr['y_corrected'] for cr in chunked_results])
+        return self.results
 
 
     @cython.boundscheck(False)
@@ -1178,10 +1176,14 @@ class FreeWater( BaseModel ) :
                         if y_corrected_view[i, j] < 0.0:
                             y_corrected_view[i, j] = 0.0
 
-        results = (estimates,)
-        results += (rmse,) if compute_rmse else (None,)
-        results += (nrmse,) if compute_nrmse else (None,)
-        results += (y_corrected,) if save_corrected_DWI else (None,)
+        results = {}
+        results['estimates'] = estimates
+        if compute_rmse:
+            results['rmse'] = rmse
+        if compute_nrmse:
+            results['nrmse'] = nrmse
+        if save_corrected_DWI:
+            results['y_corrected'] = y_corrected
         return results
 
 
@@ -1281,12 +1283,9 @@ class SANDI( BaseModel ) :
 
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 5.0E-3 ) :
-        params = {}
-        params['mode']    = 2
-        params['pos']     = True
-        params['lambda1'] = lambda1
-        params['lambda2'] = lambda2
-        return params
+        super().set_solver()
+        self._solver_params['lambda1'] = lambda1
+        self._solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ) :
@@ -1371,13 +1370,15 @@ class SANDI( BaseModel ) :
         super().fit(evaluation)
 
         # fit chunks in parallel
-        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.KERNELS, evaluation.get_config('solver_params'), self.configs) for i, j in self.chunks)
+        chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
 
         # return
-        results = (np.concatenate([cr[0] for cr in chunked_results]),)
-        results += (np.concatenate([cr[1] for cr in chunked_results]),) if self.configs['compute_rmse'] else (None,)
-        results += (np.concatenate([cr[2] for cr in chunked_results]),) if self.configs['compute_nrmse'] else (None,)
-        return results
+        self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
+        if self.configs['compute_rmse']:
+            self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
+        if self.configs['compute_nrmse']:
+            self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
+        return self.results
 
 
     @cython.boundscheck(False)
@@ -1492,7 +1493,10 @@ class SANDI( BaseModel ) :
                 if compute_nrmse:
                     _compute_nrmse(A_view, y_view[i, :], x_view, &nrmse_view[i])
 
-        results = (estimates,)
-        results += (rmse,) if compute_rmse else (None,)
-        results += (nrmse,) if compute_nrmse else (None,)
+        results = {}
+        results['estimates'] = estimates
+        if compute_rmse:
+            results['rmse'] = rmse
+        if compute_nrmse:
+            results['nrmse'] = nrmse
         return results

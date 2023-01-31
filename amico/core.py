@@ -6,6 +6,7 @@ import glob
 import sys
 from os import makedirs, remove
 from os.path import exists, join as pjoin, isfile
+import inspect
 
 import nibabel
 import pickle
@@ -103,7 +104,7 @@ class Evaluation :
         return self.CONFIG.get( key )
 
 
-    def load_data( self, dwi_filename='DWI.nii', scheme_filename='DWI.scheme', mask_filename=None, b0_thr=0 ) :
+    def load_data( self, dwi_filename='DWI.nii', scheme_filename='DWI.scheme', mask_filename=None, b0_thr=0, b0_min_signal=0, replace_bad_voxels=None ) :
         """Load the diffusion signal and its corresponding acquisition scheme.
 
         Parameters
@@ -116,6 +117,10 @@ class Evaluation :
             The file name of the (optional) binary mask (default : None)
         b0_thr : float
             The threshold below which a b-value is considered a b0 (default : 0)
+        b0_min_signal : float, optional
+            Crop to zero the signal in voxels where the b0 <= b0_min_signal * mean(b0[b0>0]). (default : 0)
+        replace_bad_voxels : float, optional
+            Value to be used to fill NaN and Inf values in the signal. (default : do nothing)
         """
         # Loading data, acquisition scheme and mask (optional)
         LOG( '\n-> Loading data:' )
@@ -125,6 +130,8 @@ class Evaluation :
         if not isfile( pjoin(self.get_config('DATA_path'), dwi_filename) ):
             ERROR( 'DWI file not found' )
         self.set_config('dwi_filename', dwi_filename)
+        self.set_config('b0_min_signal', b0_min_signal)
+        self.set_config('replace_bad_voxels', replace_bad_voxels)
         self.niiDWI = nibabel.load( pjoin(self.get_config('DATA_path'), dwi_filename) )
         self.niiDWI_img = self.niiDWI.get_data().astype(np.float32)
         hdr = self.niiDWI.header if nibabel.__version__ >= '2.0.0' else self.niiDWI.get_header()
@@ -134,12 +141,21 @@ class Evaluation :
         self.set_config('pixdim', tuple( hdr.get_zooms()[:3] ))
         PRINT('\t\t- dim    = %d x %d x %d x %d' % self.niiDWI_img.shape)
         PRINT('\t\t- pixdim = %.3f x %.3f x %.3f' % self.get_config('pixdim'))
+
         # Scale signal intensities (if necessary)
         if ( np.isfinite(hdr['scl_slope']) and np.isfinite(hdr['scl_inter']) and hdr['scl_slope'] != 0 and
             ( hdr['scl_slope'] != 1 or hdr['scl_inter'] != 0 ) ):
             PRINT('\t\t- rescaling data ', end='')
             self.niiDWI_img = self.niiDWI_img * hdr['scl_slope'] + hdr['scl_inter']
             PRINT('[OK]')
+
+        # Check for Nan or Inf values in raw data
+        if np.isnan(self.niiDWI_img).any() or np.isinf(self.niiDWI_img).any():
+            if replace_bad_voxels is not None:
+                WARNING(f'Nan or Inf values in the raw signal. They will be replaced with: {replace_bad_voxels}')
+                np.nan_to_num(self.niiDWI_img, copy=False, nan=replace_bad_voxels, posinf=replace_bad_voxels, neginf=replace_bad_voxels)
+            else:
+                ERROR('Nan or Inf values in the raw signal. Try using the "replace_bad_voxels" or "b0_min_signal" parameters when calling "load_data()"')
 
         PRINT('\t* Acquisition scheme')
         if not isfile( pjoin(self.get_config('DATA_path'), scheme_filename) ):
@@ -173,6 +189,7 @@ class Evaluation :
             self.niiMASK = None
             self.niiMASK_img = np.ones( self.get_config('dim') )
             PRINT('\t\t- not specified')
+        self.set_config('mask_filename', mask_filename)
         PRINT(f'\t\t- voxels = {np.count_nonzero(self.niiMASK_img)}')
 
         LOG( f'   [ {time.time() - tic:.1f} seconds ]' )
@@ -197,7 +214,7 @@ class Evaluation :
             else:
                 ERROR( 'No b0 volume to normalize signal with' )
             norm_factor = self.mean_b0s.copy()
-            idx = self.mean_b0s <= 0
+            idx = norm_factor <= b0_min_signal * norm_factor[norm_factor > 0].mean()
             norm_factor[ idx ] = 1
             norm_factor = 1 / norm_factor
             norm_factor[ idx ] = 0
@@ -250,6 +267,14 @@ class Evaluation :
             if self.scheme.nS != self.niiDWI_img.shape[3] :
                 ERROR( 'Scheme does not match with DWI data' )
 
+        # Check for Nan or Inf values in pre-processed data
+        if np.isnan(self.niiDWI_img).any() or np.isinf(self.niiDWI_img).any():
+            if replace_bad_voxels is not None:
+                WARNING(f'Nan or Inf values in the signal after the pre-processing. They will be replaced with: {replace_bad_voxels}')
+                np.nan_to_num(self.niiDWI_img, copy=False, nan=replace_bad_voxels, posinf=replace_bad_voxels, neginf=replace_bad_voxels)
+            else:
+                ERROR('Nan or Inf values in the signal after the pre-processing. Try using the "replace_bad_voxels" or "b0_min_signal" parameters when calling "load_data()"')
+
         LOG( f'   [ {time.time() - tic:.1f} seconds ]' )
 
 
@@ -274,12 +299,28 @@ class Evaluation :
 
 
     def set_solver( self, **params ) :
-        """Setup the specific parameters of the solver to fit the model.
-        Dispatch to the proper function, depending on the model; a model shoudl provide a "set_solver" function to set these parameters.
+        """Set up the specific parameters of the solver to fit the model.
+        Dispatch to the proper function, depending on the model; a model should provide a "set_solver" function to set these parameters.
+        StickZeppelinBall:      'set_solver()' not implemented
+        CylinderZeppelinBall:   lambda1 = 0.0, lambda2 = 4.0
+        NODDI:                  lambda1 = 5e-1, lambda2 = 1e-3
+        FreeWater:              lambda1 = 0.0, lambda2 = 1e-3
+        VolumeFractions:        'set_solver()' not implemented
+        SANDI:                  lambda1 = 0.0, lambda2 = 5e-3
         """
         if self.model is None :
             ERROR( 'Model not set; call "set_model()" method first' )
-        self.set_config('solver_params', self.model.set_solver( **params ))
+        
+        solver_params = list(inspect.signature(self.model.set_solver).parameters)
+        params_new = {}
+        for key in params.keys():
+            if key not in solver_params:
+                WARNING(f"Cannot find the '{key}' solver-parameter for the {self.model.name} model. It will be ignored")
+            else:
+                params_new[key] = params[key]
+
+        self.model.set_solver(**params_new)
+        self.set_config('solver_params', params_new)
 
 
     def generate_kernels( self, regenerate = False, lmax = 12, ndirs = 500 ) :
@@ -300,7 +341,7 @@ class Evaluation :
         if self.model is None :
             ERROR( 'Model not set; call "set_model()" method first' )
         if not is_valid(ndirs):
-            ERROR( 'Unsupported value for ndirs.\nNote: Supported values for ndirs are [1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 32761 (default)]' )
+            ERROR( 'Unsupported value for ndirs.\nNote: Supported values for ndirs are [1, 500 (default), 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 32761]' )
         
         self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
 
@@ -373,8 +414,8 @@ class Evaluation :
             ERROR( 'Response functions not generated; call "generate_kernels()" and "load_kernels()" first' )
         if self.KERNELS['model'] != self.model.id :
             ERROR( 'Response functions were not created with the same model' )
-        if self.get_config('DTI_fit_method') not in ['OLS', 'WLS']:
-            ERROR("DTI fit method must be 'OLS' or 'WLS'")
+        if self.get_config('DTI_fit_method') not in ['OLS', 'LS', 'WLS', 'NLLS', 'RT', 'RESTORE', 'restore']:
+            ERROR("DTI fit method must be one of the following:\n'OLS'(default) or 'LS': ordinary least squares\n'WLS': weighted least squares\n'NLLS': non-linear least squares\n'RT' or 'RESTORE' or 'restore': robust tensor\nNOTE: more info at https://dipy.org/documentation/1.6.0./reference/dipy.reconst/#dipy.reconst.dti.TensorModel")
         
         self.n_threads = self.get_config('n_threads') if self.get_config('n_threads') > 0 else cpu_count() if self.get_config('n_threads') == -1 else ERROR('Number of parallel threads must be positive or -1')
         self.BLAS_threads = self.get_config('BLAS_threads') if self.get_config('BLAS_threads') > 0 else cpu_count() if self.get_config('BLAS_threads') == -1 else ERROR('Number of BLAS threads must be positive or -1')
@@ -410,7 +451,7 @@ class Evaluation :
 
         # precompute directions
         if not self.get_config('doDirectionalAverage') and DTI is not None:
-            with Loader(message='Precomputing directions ({0})'.format(self.get_config('DTI_fit_method')), verbose=get_verbose()):
+            with Loader(message=f"Precomputing directions ({self.get_config('DTI_fit_method')})", verbose=get_verbose()):
                 self.DIRs = np.squeeze(DTI.fit(self.y).directions)
         # call the fit() method of the actual model
         with self._controller.limit(limits=self.BLAS_threads, user_api='blas'):
@@ -424,24 +465,24 @@ class Evaluation :
         self.RESULTS = {}
         # estimates (maps)
         self.RESULTS['MAPs'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], len(self.model.maps_name)], dtype=np.float32)
-        self.RESULTS['MAPs'][self.niiMASK_img==1, :] = results[0]
+        self.RESULTS['MAPs'][self.niiMASK_img==1, :] = results['estimates']
         # directions
         self.RESULTS['DIRs'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], 3], dtype=np.float32)
         self.RESULTS['DIRs'][self.niiMASK_img==1, :] = self.DIRs
         # fitting error
         if self.get_config('doComputeRMSE') :
             self.RESULTS['RMSE'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2]], dtype=np.float32)
-            self.RESULTS['RMSE'][self.niiMASK_img==1] = results[1]
+            self.RESULTS['RMSE'][self.niiMASK_img==1] = results['rmse']
         if self.get_config('doComputeNRMSE') :
             self.RESULTS['NRMSE'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2]], dtype=np.float32)
-            self.RESULTS['NRMSE'][self.niiMASK_img==1] = results[2]
+            self.RESULTS['NRMSE'][self.niiMASK_img==1] = results['nrmse']
         # Modulated NDI and ODI maps (NODDI)
         if self.model.name == 'NODDI' and self.get_config('doSaveModulatedMaps'):
             self.RESULTS['MAPs_mod'] = np.zeros([self.get_config('dim')[0], self.get_config('dim')[1], self.get_config('dim')[2], 2], dtype=np.float32)
-            self.RESULTS['MAPs_mod'][self.niiMASK_img==1, :] = results[3]
+            self.RESULTS['MAPs_mod'][self.niiMASK_img==1, :] = results['estimates_mod']
         # corrected DWI (Free-Water)
         if self.model.name == 'Free-Water' and self.get_config('doSaveCorrectedDWI') :
-            y_corrected = results[3]
+            y_corrected = results['y_corrected']
             if self.get_config('doNormalizeSignal') and self.scheme.b0_count > 0:
                 y_corrected = y_corrected * np.reshape(self.mean_b0s[self.niiMASK_img==1], (-1, 1))
             if self.get_config('doKeepb0Intact') and self.scheme.b0_count > 0:
