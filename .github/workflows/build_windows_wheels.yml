@@ -57,7 +57,7 @@ jobs:
     needs: build_wheels
     name: Upload wheels test
     runs-on: windows-2019
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref_name == 'main' }}
     steps:
       - name: Step 1
         run: |
