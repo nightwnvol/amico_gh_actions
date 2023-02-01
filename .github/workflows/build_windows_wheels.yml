@@ -1,3 +1,7 @@
+# TODO: make only one file??
+# three jobs to build (windows, macos, linux)
+# one job to upload (needs the three build jobs)
+# macos arm64 wheels??
 name: Build Windows wheels
 on: workflow_dispatch
 jobs:
@@ -53,6 +57,7 @@ jobs:
     needs: build_wheels
     name: Upload wheels test
     runs-on: windows-2019
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Step 1
         run: |
