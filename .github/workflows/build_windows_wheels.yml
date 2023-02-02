@@ -34,7 +34,7 @@ jobs:
             pip install delvewheel
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
             delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
-          CIBW_BEFORE_TEST_MACOS: >
+          CIBW_BEFORE_TEST_WINDOWS: >
             7z x test/demo.zip -o"test/demo"
       
       - name: Upload artifacts
