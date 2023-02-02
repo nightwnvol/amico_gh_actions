@@ -1,8 +1,5 @@
-# TODO: make only one file??
-# three jobs to build (windows, macos, linux)
-# one job to upload (needs the three build jobs)
-# macos arm64 wheels??
 name: Build Windows wheels
+run-name: Build Windows wheels on branch ${{ github.ref_name }}
 on: workflow_dispatch
 jobs:
   build_wheels:
@@ -53,12 +50,22 @@ jobs:
           name: wheels_windows_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
 
+  # build_sdist NOTE: requested only one time
+
   upload_wheels:
     needs: build_wheels
-    name: Upload wheels test
-    runs-on: windows-2019
+    name: Upload Windows wheels
+    runs-on: ubuntu-20.04
     if: ${{ github.ref_name == 'main' }}
     steps:
-      - name: Step 1
-        run: |
-          echo STEP 1
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+        
+      - name: Publish package to PyPI Test
+        uses: pypa/gh-action-pypi-publish@v1.6.4
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: artifacts/**
