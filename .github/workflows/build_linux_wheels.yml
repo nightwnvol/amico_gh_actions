@@ -1,6 +1,6 @@
 # TODO: replace env var name TEST_TOKEN, OB_X86_64, OB_AARCH64
 name: Build Linux wheels
-run-name: Build Linux wheels on branch ${{ github.ref_name }}
+run-name: Build Linux wheels on branch `${{ github.ref_name }}`
 on: workflow_dispatch
 jobs:
   build_wheels:
@@ -45,8 +45,8 @@ jobs:
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_LINUX: ${{ matrix.arch[0] }}
           CIBW_BEFORE_ALL_LINUX: > # TODO: put it in BEFORE_TEST?
-            yum install -y p7zip &&
-            7z x test/demo.zip -o"test/demo"
+            yum install -y p7zip-full &&
+            7za x test/demo.zip -o"test/demo"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             LD_LIBRARY_PATH=/host${{ github.workspace }}/OpenBLAS/lib auditwheel repair -w {dest_dir} {wheel}
 
