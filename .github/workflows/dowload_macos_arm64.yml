@@ -5,7 +5,7 @@ on:
 jobs:
   download_wheels:
     name: arm64 # TODO change name?
-    if: ${{ github.event.client_payload.passed }}
+    if: ${{ github.event.client_payload.passed }} # TODO: add github.ref_name == 'main'
     runs-on: ubuntu-20.04
     steps:
       - name: Download from Cirrus CI
