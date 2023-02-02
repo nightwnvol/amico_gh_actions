@@ -1,6 +1,6 @@
 # TODO: replace env var name TEST_TOKEN, OB_X86_64, OB_AARCH64
 name: Build Linux wheels
-run-name: Build Linux wheels on branch `${{ github.ref_name }}`
+run-name: Build Linux wheels on branch '${{ github.ref_name }}'
 on: workflow_dispatch
 jobs:
   build_wheels:

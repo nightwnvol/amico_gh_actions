@@ -1,6 +1,6 @@
 # TODO: replace env var name TEST_TOKEN, OB_MACOS
 name: Build MacOS wheels
-run-name: Build MacOS wheels on branch ${{ github.ref_name }}
+run-name: Build MacOS wheels on branch '${{ github.ref_name }}'
 on: workflow_dispatch
 jobs:
   build_wheels:
