@@ -42,13 +42,15 @@ build_macos_wheels_task:
       7z x test/demo.zip -o"test/demo"
     CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
       DYLD_LIBRARY_PATH=${CIRRUS_WORKING_DIR}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+  test_env_script:
+    - echo "MEM_TEST=CIAO" >> ${CIRRUS_ENV}
   install_requirements_script:
     - brew install p7zip
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
     # - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip # TODO: change env var name OPENBLAS_BUILD_ID # refer to the latest??
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main # TODO: add ?branch=BRANCH
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
     - python3.10 setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
