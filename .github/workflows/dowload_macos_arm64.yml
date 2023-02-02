@@ -1,8 +1,8 @@
 name: Download MacOS arm64 wheels
-run-name: MacOS wheels on branch '${{ github.ref_name }}'
+run-name: Download MacOS arm64 wheels on branch '${{ github.ref_name }}'
 on:
   repository_dispatch:
-    types: [test_download] # TODO change name
+    types: [macos_arm64_wheels]
 jobs:
   download_wheels:
     name: arm64 # TODO change name?
