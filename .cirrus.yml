@@ -47,7 +47,8 @@ build_macos_wheels_task:
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
-    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip # TODO: change env var name OPENBLAS_BUILD_ID
+    # - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip # TODO: change env var name OPENBLAS_BUILD_ID # refer to the latest??
+    - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/github/nightwnvol/amico_gh_actions/compile_OpenBLAS_macos/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
     - python3.10 setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
@@ -62,8 +63,6 @@ trigger_github_task:
   only_if: $CIRRUS_BRANCH == 'main'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
-  # env:
-  #   DOWNLOAD_TOKEN: ENCRYPTED[80a1c1bc07dd0251f6ed4092ca01d3b8fcbe5dd5f2117ab8fc916882904e80ef2f53a90f9483431ab26fcadbf30ba393] # TODO put this on env variables
   clone_script:
     - echo SKIP
   # TODO: view here https://towardsdatascience.com/proper-ways-to-pass-environment-variables-in-json-for-curl-post-f797d2698bf3
