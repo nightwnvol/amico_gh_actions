@@ -8,7 +8,7 @@ on:
         required: true
         type: number
       passed:
-        description: 'Result of the CirrusCI build'
+        description: 'CirrusCI build is passed'
         required: true
         type: boolean
 jobs:
