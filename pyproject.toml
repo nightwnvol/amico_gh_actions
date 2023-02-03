@@ -7,9 +7,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-test-command = "python -m pip install -U pip && pip list && pip show dmri-amico -v && python {project}/test/noddi.py"
+test-command = "python -m pip install -U pip && pip list && pip show dmri-amico -v && python {project}/test/noddi.py" # TODO: delete print
 test-skip = "*-win32 cp38-macosx_arm64 *-manylinux_aarch64"
-build-verbosity = 3
+build-verbosity = 3 # TODO: delete this
 
 # [tool.cibuildwheel.windows]
 # before-build = "pip install delvewheel"

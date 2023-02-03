@@ -1,8 +1,5 @@
-# TODO: make only one file??
-# three jobs to build (windows, macos, linux)
-# one job to upload (needs the three build jobs)
-# macos arm64 wheels??
 name: Build Windows wheels
+run-name: Build Windows wheels on branch '${{ github.ref_name }}'
 on: workflow_dispatch
 jobs:
   build_wheels:
@@ -10,24 +7,17 @@ jobs:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
-          - [AMD64, win_amd64]
-          - [x86, win32]
+          - [AMD64, win_amd64, x64]
+          - [x86, win32, x86]
     name: ${{ matrix.py }}-${{ matrix.arch[1] }}
     runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download compiled OpenBLAS (AMD64)
-        if: ${{ matrix.arch[0] == 'AMD64' }}
+      - name: Download Compiled OpenBLAS
         run: |
-          curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x64.zip
-          7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
-
-      - name: Download compiled OpenBLAS (x86)
-        if: ${{ matrix.arch[0] == 'x86' }}
-        run: |
-          curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-x86.zip
+          curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip
           7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
 
       - name: Set up configuration file
@@ -40,12 +30,12 @@ jobs:
           CIBW_PLATFORM: windows
           CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.arch[0] }}
-          CIBW_BEFORE_ALL_WINDOWS: > # TODO: put it in BEFORE_TEST?
-            7z x test/demo.zip -o"test/demo"
           CIBW_BEFORE_BUILD_WINDOWS: >
             pip install delvewheel
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
             delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
+          CIBW_BEFORE_TEST_WINDOWS: >
+            7z x test/demo.zip -o"test/demo"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -53,12 +43,22 @@ jobs:
           name: wheels_windows_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
 
+  # build_sdist NOTE: requested only one time
+
   upload_wheels:
     needs: build_wheels
-    name: Upload wheels test
-    runs-on: windows-2019
-    if: ${{ github.ref == 'refs/heads/main' }}
+    name: Upload Windows wheels
+    runs-on: ubuntu-20.04
+    if: ${{ github.ref_name == 'main' }}
     steps:
-      - name: Step 1
-        run: |
-          echo STEP 1
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+        
+      - name: Publish package to PyPI Test
+        uses: pypa/gh-action-pypi-publish@v1.6.4
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: artifacts/**
