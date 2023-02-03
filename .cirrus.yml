@@ -10,12 +10,13 @@ compile_OpenBLAS_macos_task:
     - echo SKIP CLONE
   install_requirements_script:
     - brew install p7zip
-  compile_OpenBLAS_arm64_script:
+  compile_OpenBLAS_arm64_script: # TODO: set the OPENBLAS_BUILD_ID in GH
     - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=${CIRRUS_WORKING_DIR}/OpenBLAS
     - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
+    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"OPENBLAS_BUILD_ID","value":"'"${CIRRUS_BUILD_ID}"'"}'
   compiled_OpenBLAS_artifacts:
     path: 'OpenBLAS_macos_arm64.zip'
 
@@ -85,7 +86,7 @@ build_macos_wheels_task:
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
   download_compiled_OpenBLAS_script:
-    - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq -r .value)
+    - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/OPENBLAS_BUILD_ID | jq -r .value)
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
@@ -107,38 +108,38 @@ trigger_github_task:
   clone_script:
     - echo SKIP CLONE
   download_script:
-    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/workflows/dowload_macos_arm64.yml/dispatches -d "{\"ref\":\"${CIRRUS_BRANCH}\",\"inputs\":{\"passed\":\"true\",\"cirrus_build_id\":\"6043474621890560\"}}"
+    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/workflows/dowload_macos_arm64.yml/dispatches -d '{"ref":"'"${CIRRUS_BRANCH}"'","inputs":{"passed":"true","cirrus_build_id":"'"${CIRRUS_BUILD_ID}"'"}}'
 
-set_env_task:
-  name: Test set env in GH
-  alias: set_env_test
-  trigger_type: manual
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode
-  clone_script:
-    - echo SKIP CLONE
-  set_env_script:
-    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"CIRRUS_ENV_VAR","value":"4925916816605184"}'
+# set_env_task:
+#   name: Test set env in GH
+#   alias: set_env_test
+#   trigger_type: manual
+#   macos_instance:
+#     image: ghcr.io/cirruslabs/macos-monterey-xcode
+#   clone_script:
+#     - echo SKIP CLONE
+#   set_env_script:
+#     - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"CIRRUS_ENV_VAR","value":"4925916816605184"}'
 
-get_env_task:
-  name: Test get env in GH
-  alias: get_env_test
-  trigger_type: manual
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-monterey-xcode
-  clone_script:
-    - echo SKIP CLONE
-  install_requirements_script:
-    - brew install jq
-  set_env_script:
-    - echo OB_ENV_TEST=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value') >> $CIRRUS_ENV
-  get_env_script:
-    - echo CIAO
-    - echo ${OB_ENV_TEST}
-  test_test_script:
-    - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value')
-    - echo $OPENBLAS_BUILD_ID
-    - echo ${OPENBLAS_BUILD_ID}
+# get_env_task:
+#   name: Test get env in GH
+#   alias: get_env_test
+#   trigger_type: manual
+#   macos_instance:
+#     image: ghcr.io/cirruslabs/macos-monterey-xcode
+#   clone_script:
+#     - echo SKIP CLONE
+#   install_requirements_script:
+#     - brew install jq
+#   set_env_script:
+#     - echo OB_ENV_TEST=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value') >> $CIRRUS_ENV
+#   get_env_script:
+#     - echo CIAO
+#     - echo ${OB_ENV_TEST}
+#   test_test_script:
+#     - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value')
+#     - echo $OPENBLAS_BUILD_ID
+#     - echo ${OPENBLAS_BUILD_ID}
 
 # trigger_github_task:
 #   name: Trigger GitHub job
