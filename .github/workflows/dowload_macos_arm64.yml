@@ -8,7 +8,7 @@ on:
         required: true
         type: number
       passed:
-        description: 'Result of the CirrusCI build'
+        description: 'CirrusCI build is passed'
         required: true
         type: boolean
 jobs:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          curl -L -o wheels_macos_arm64.zip https://api.cirrus-ci.com/v1/artifact/build/${{ inputs.build_id }}/build_macos_wheels/wheels_macos_arm64.zip
+          curl -L -o wheels_macos_arm64.zip https://api.cirrus-ci.com/v1/artifact/build/${{ inputs.cirrus_build_id }}/build_macos_wheels/wheels_macos_arm64.zip
           unzip wheels_macos_arm64.zip
       
       - name: Upload artifacts
