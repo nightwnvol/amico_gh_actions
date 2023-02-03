@@ -56,12 +56,6 @@ compile_OpenBLAS_macos_task:
 #   wheels_macos_arm64_artifacts:
 #     path: './wheelhouse/*.whl'
 
-get_openblas_build_id: &GET_OPENBLAS_BUILD_ID
-  install_requirements_script:
-    - brew install jq
-  get_build_id_script:
-    - echo OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value') >> $CIRRUS_ENV
-
 build_macos_wheels_task:
   name: Build MacOS wheels
   alias: build_macos_wheels
@@ -87,9 +81,11 @@ build_macos_wheels_task:
       7z x test/demo.zip -o"test/demo"
   install_requirements_script:
     - brew install p7zip
+    - brew install jq
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
-  <<: *GET_OPENBLAS_BUILD_ID
+  get_OpenBLAS_build_id_script:
+    - echo OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value') >> $CIRRUS_ENV
   download_compiled_OpenBLAS_script:
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main
     - 7z x OpenBLAS.zip -o"OpenBLAS"
