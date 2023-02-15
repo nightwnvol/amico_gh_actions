@@ -1,6 +1,6 @@
 name: Build Windows wheels
 run-name: Build Windows wheels on branch '${{ github.ref_name }}'
-on: workflow_dispatch
+on: push
 jobs:
   build_wheels:
     strategy:

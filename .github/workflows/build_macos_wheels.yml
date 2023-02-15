@@ -1,6 +1,6 @@
 name: Build MacOS wheels
 run-name: Build MacOS wheels on branch '${{ github.ref_name }}'
-on: workflow_dispatch
+on: push
 jobs:
   build_wheels:
     strategy:
@@ -23,7 +23,6 @@ jobs:
           name: OpenBLAS_macos_${{ matrix.arch[0] }}
           path: OpenBLAS
           search_artifacts: true
-          if_no_artifact_found: fail
 
       - name: Set up configuration file
         run: |

@@ -60,7 +60,7 @@ compile_OpenBLAS_macos_task:
 build_macos_wheels_task:
   name: Build MacOS wheels
   alias: build_macos_wheels
-  trigger_type: manual
+  # trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   matrix:
@@ -101,8 +101,8 @@ build_macos_wheels_task:
 # TODO: use "'" insted of \"
 trigger_github_task:
   name: Trigger GitHub job
-  # depends_on: build_macos_wheels
-  trigger_type: manual
+  depends_on: build_macos_wheels
+  # trigger_type: manual
   # only_if: $CIRRUS_BRANCH == 'main'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
