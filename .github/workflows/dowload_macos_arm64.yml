@@ -7,6 +7,10 @@ on:
         description: 'CirrusCI build ID'
         required: true
         type: number
+      check_run_id:
+        description: Check run ID
+        required: true
+        type: number
       passed:
         description: 'CirrusCI build is passed'
         required: true
@@ -28,3 +32,7 @@ jobs:
         with:
           name: wheels_macos_arm64
           path: ./wheelhouse/*.whl
+
+      - name: Update check
+        run: |
+          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"test_check","status":"completed","conclusion":"success"}'
