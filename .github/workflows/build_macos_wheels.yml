@@ -1,6 +1,7 @@
 name: Build MacOS wheels
 run-name: Build MacOS wheels on branch '${{ github.ref_name }}'
-on: push
+# on: push
+on: workflow_dispatch
 jobs:
   build_wheels:
     strategy:
