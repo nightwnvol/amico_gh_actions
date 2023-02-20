@@ -33,6 +33,34 @@ jobs:
           name: wheels_macos_arm64
           path: ./wheelhouse/*.whl
 
-      - name: Update check
+      # - name: Update check
+      #   run: |
+      #     curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
+
+  upload_wheels:
+    needs: [macos_arm64_wheels]
+    name: Upload MacOS arm64 wheels
+    runs-on: ubuntu-20.04
+    if: ${{ github.ref_name == 'main' }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+        
+      - name: Publish package to PyPI Test
+        uses: pypa/gh-action-pypi-publish@v1.6.4
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: artifacts/**
+
+  complete_macos_arm64_check:
+    # TODO: if upload_wheels fails, then fail also the check
+    needs: [upload_wheels]
+    name: Create MacOS arm64 check
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Create check
         run: |
-          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"arm64_check","status":"completed","conclusion":"success"}'
+          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
