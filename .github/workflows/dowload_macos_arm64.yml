@@ -41,7 +41,7 @@ jobs:
     needs: [macos_arm64_wheels]
     name: Upload MacOS arm64 wheels
     runs-on: ubuntu-20.04
-    # if: ${{ github.ref_name == 'main' }}
+    if: ${{ github.ref_name == 'main' }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
