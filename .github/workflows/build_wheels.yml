@@ -156,6 +156,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up configuration file
+        run: | # NOTE: need to add '/host' because they will be paths into a Docker container
+          python setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+
       - name: Build sdist
         run: |
           pip install -U pip
