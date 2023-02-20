@@ -166,6 +166,13 @@ jobs:
           pip install -U build
           python -m build --sdist
 
+      - name: Test sdist
+        run: | # TODO: still need to build a wheel in order to link OpenBLAS. Follow the guide on the main repo
+          echo TODO
+# tar -xzf dist/*.tar.gz
+# python setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+# python - m build --wheel
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -186,7 +193,7 @@ jobs:
       - name: List dir
         run: |
           ls -l
-          ls -l artifacts/
+          ls -l artifacts/*
         
       # - name: Publish package to PyPI Test
       #   uses: pypa/gh-action-pypi-publish@v1.6.4
