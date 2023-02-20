@@ -16,8 +16,8 @@ on:
         required: true
         type: boolean
 jobs:
-  download_wheels:
-    name: arm64 # TODO change name?
+  macos_arm64_wheels:
+    name: '*-macosx_arm64'
     if: ${{ inputs.passed }} # TODO: add github.ref_name == 'main'
     runs-on: ubuntu-20.04
     # TODO: use 7z
