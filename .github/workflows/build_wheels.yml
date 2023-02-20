@@ -153,7 +153,7 @@ jobs:
   # build_sdist NOTE: requested only one time
 
   upload_wheels:
-    needs: build_wheels
+    needs: build_windows_wheels
     name: Upload Windows wheels
     runs-on: ubuntu-20.04
     if: ${{ github.ref_name == 'main' }}
