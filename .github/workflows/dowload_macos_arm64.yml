@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Download from Cirrus CI
         run: |
-          curl -L -o wheels_macos_arm64.zip https://api.cirrus-ci.com/v1/artifact/build/${{ inputs.cirrus_build_id }}/build_macos_wheels/wheels_macos_arm64.zip
+          echo "res=$(curl -L -o wheels_macos_arm64.zip -w '%{http_code}' https://api.cirrus-ci.com/v1/artifact/build/${{ inputs.cirrus_build_id }}/build_macos_wheels/wheels_macos_arm64.zip)" >> $GITHUB_ENV
           unzip wheels_macos_arm64.zip
       
       - name: Upload artifacts
@@ -33,9 +33,15 @@ jobs:
           name: wheels_macos_arm64
           path: ./wheelhouse/*.whl
 
-      # - name: Update check
-      #   run: |
-      #     curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
+      - name: Complete MacOS arm64 check
+        if: env.res == "200"
+        run: |
+          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
+
+      - name: Complete MacOS arm64 check
+        if: env.res != "200"
+        run: |
+          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"failure"}'
 
   upload_wheels:
     needs: [macos_arm64_wheels]
@@ -60,15 +66,13 @@ jobs:
       #     repository_url: https://test.pypi.org/legacy/
       #     packages_dir: artifacts/**
 
-  complete_macos_arm64_check:
-    # TODO: if upload_wheels fails, then fail also the check
-    needs: [macos_arm64_wheels]
-    if: |
-      (github.ref_name == 'main' && jobs.upload_wheels.result == 'success') ||
-      (github.ref_name != 'main' && jobs.upload_wheels.result == 'skipped')
-    name: Complete MacOS arm64 check
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Complete check
-        run: |
-          curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
+  # complete_macos_arm64_check:
+  #   # TODO: if upload_wheels fails, then fail also the check
+  #   needs: [macos_arm64_wheels]
+  #   if: (github.ref_name == 'main' && jobs.upload_wheels.result == 'success') || (github.ref_name != 'main' && jobs.upload_wheels.result == 'skipped')
+  #   name: Complete MacOS arm64 check
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Complete check
+  #       run: |
+  #         curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs/${{ inputs.check_run_id }} -d '{"name":"cp*-macosx_arm64","status":"completed","conclusion":"success"}'
