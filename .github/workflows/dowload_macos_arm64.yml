@@ -39,9 +39,9 @@ jobs:
 
   upload_wheels:
     needs: [macos_arm64_wheels]
+    if: ${{ github.ref_name == 'main' }}
     name: Upload MacOS arm64 wheels
     runs-on: ubuntu-20.04
-    if: ${{ github.ref_name == 'main' }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -62,10 +62,10 @@ jobs:
 
   complete_macos_arm64_check:
     # TODO: if upload_wheels fails, then fail also the check
-    needs: [macos_arm64_wheels, upload_wheels]
+    needs: [macos_arm64_wheels]
     if: |
-      (github.ref_name == 'main' && needs.macos_arm64_wheels.result == 'success' && needs.upload_wheels.result == 'success') ||
-      (github.ref_name != 'main' && needs.macos_arm64_wheels.result == 'success' && needs.upload_wheels.result == 'skipped')
+      (github.ref_name == 'main' && needs.upload_wheels.result == 'success') ||
+      (github.ref_name != 'main' && needs.upload_wheels.result == 'skipped')
     name: Complete MacOS arm64 check
     runs-on: ubuntu-20.04
     steps:
