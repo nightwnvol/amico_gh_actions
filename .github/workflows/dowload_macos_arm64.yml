@@ -64,8 +64,8 @@ jobs:
     # TODO: if upload_wheels fails, then fail also the check
     needs: [macos_arm64_wheels]
     if: |
-      (github.ref_name == 'main' && needs.upload_wheels.result == 'success') ||
-      (github.ref_name != 'main' && needs.upload_wheels.result == 'skipped')
+      (github.ref_name == 'main' && jobs.upload_wheels.result == 'success') ||
+      (github.ref_name != 'main' && jobs.upload_wheels.result == 'skipped')
     name: Complete MacOS arm64 check
     runs-on: ubuntu-20.04
     steps:
