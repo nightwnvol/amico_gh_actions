@@ -6,57 +6,22 @@ compile_OpenBLAS_macos_task:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   env:
     MACOSX_DEPLOYMENT_TARGET: "11.0"
-  clone_script: # TODO: name Clone?
+  # TODO: name Clone?
+  clone_script:
     - echo SKIP CLONE
   install_requirements_script:
     - brew install p7zip
+  # TODO: DOWNLOAD_TOKEN -> GITHUB_TOKEN
   compile_OpenBLAS_arm64_script:
     - curl -L -o OpenBLAS-0.3.21.tar.gz https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21.tar.gz
     - tar -xzf OpenBLAS-0.3.21.tar.gz
     - make -C OpenBLAS-0.3.21 TARGET=ARMV8 DYNAMIC_ARCH=1
     - make install -C OpenBLAS-0.3.21 PREFIX=${CIRRUS_WORKING_DIR}/OpenBLAS
     - 7z a OpenBLAS_macos_arm64.zip ./OpenBLAS/*
-    - curl -X DELETE -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/OPENBLAS_BUILD_ID
-    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"OPENBLAS_BUILD_ID","value":"'"${CIRRUS_BUILD_ID}"'"}'
+    - curl -X DELETE -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_BUILD_ID
+    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"CIRRUS_BUILD_ID","value":"'"${CIRRUS_BUILD_ID}"'"}'
   compiled_OpenBLAS_artifacts:
     path: 'OpenBLAS_macos_arm64.zip'
-
-# build_macos_wheels_task:
-#   name: Build MacOS wheels
-#   alias: build_macos_wheels
-#   trigger_type: manual
-#   macos_instance:
-#     image: ghcr.io/cirruslabs/macos-monterey-xcode
-#   matrix:
-#     - env:
-#         CP: "38"
-#     - env:
-#         CP: "39"
-#     - env:
-#         CP: "310"
-#   env:
-#     MACOSX_DEPLOYMENT_TARGET: 11.0
-#     PATH: ${PATH}:/opt/homebrew/opt/python@3.10/bin
-#     CIBW_PLATFORM: macos
-#     CIBW_BUILD: cp${CP}-macosx_arm64
-#     CIBW_ARCHS_MACOS: arm64
-#     CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-#       DYLD_LIBRARY_PATH=${CIRRUS_WORKING_DIR}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-#     CIBW_BEFORE_TEST_MACOS: >
-#       7z x test/demo.zip -o"test/demo"
-#   install_requirements_script:
-#     - brew install p7zip
-#     - brew install python@3.10
-#     - python3.10 -m pip install cibuildwheel==2.12.0
-#   download_compiled_OpenBLAS_script:
-#     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main
-#     - 7z x OpenBLAS.zip -o"OpenBLAS"
-#   set_up_configuration_file_script:
-#     - python3.10 setup_config.py openblas openblas ${CIRRUS_WORKING_DIR}/OpenBLAS/lib ${CIRRUS_WORKING_DIR}/OpenBLAS/include
-#   run_cibuildwheel_script:
-#     - cibuildwheel
-#   wheels_macos_arm64_artifacts:
-#     path: './wheelhouse/*.whl'
 
 build_macos_wheels_task:
   name: Build MacOS wheels
@@ -86,9 +51,9 @@ build_macos_wheels_task:
     - brew install jq
     - brew install python@3.10
     - python3.10 -m pip install cibuildwheel==2.12.0
+  # TODO: OPENBLAS_BUILD_ID -> CIRRUS_BUILD_ID
   download_compiled_OpenBLAS_script:
     - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/OPENBLAS_BUILD_ID | jq -r .value)
-    # - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip?branch=main # NOTE: no need ?branch
     - curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${OPENBLAS_BUILD_ID}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
     - 7z x OpenBLAS.zip -o"OpenBLAS"
   set_up_configuration_file_script:
@@ -98,62 +63,17 @@ build_macos_wheels_task:
   wheels_macos_arm64_artifacts:
     path: './wheelhouse/*.whl'
 
-# TODO: to test
-# TODO: use "'" insted of \"
 trigger_github_task:
   name: Trigger GitHub job
   depends_on: build_macos_wheels
-  # trigger_type: manual
-  # only_if: $CIRRUS_BRANCH == 'main'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
+  # TODO: name Clone?
   clone_script:
     - echo SKIP CLONE
   install_requirements_script:
     - brew install jq
+  # TODO: dowload_macos_arm64 ID
   download_script:
     - CHECK_ID_MACOS_ARM64=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CHECK_ID_MACOS_ARM64 | jq -r .value)
-    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/workflows/dowload_macos_arm64.yml/dispatches -d '{"ref":"'"${CIRRUS_BRANCH}"'","inputs":{"passed":"true","cirrus_build_id":"'"${CIRRUS_BUILD_ID}"'","check_run_id":"'"${CHECK_ID_MACOS_ARM64}"'"}}'
-    # - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/workflows/dowload_macos_arm64.yml/dispatches -d '{"ref":"'"${CIRRUS_BRANCH}"'","inputs":{"passed":"true","cirrus_build_id":"6201238082027520","check_run_id":"'"${CHECK_ID_MACOS_ARM64}"'"}}'
-
-# set_env_task:
-#   name: Test set env in GH
-#   alias: set_env_test
-#   trigger_type: manual
-#   macos_instance:
-#     image: ghcr.io/cirruslabs/macos-monterey-xcode
-#   clone_script:
-#     - echo SKIP CLONE
-#   set_env_script:
-#     - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"CIRRUS_ENV_VAR","value":"4925916816605184"}'
-
-# get_env_task:
-#   name: Test get env in GH
-#   alias: get_env_test
-#   trigger_type: manual
-#   macos_instance:
-#     image: ghcr.io/cirruslabs/macos-monterey-xcode
-#   clone_script:
-#     - echo SKIP CLONE
-#   install_requirements_script:
-#     - brew install jq
-#   set_env_script:
-#     - echo OB_ENV_TEST=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value') >> $CIRRUS_ENV
-#   get_env_script:
-#     - echo CIAO
-#     - echo ${OB_ENV_TEST}
-#   test_test_script:
-#     - OPENBLAS_BUILD_ID=$(curl -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CIRRUS_ENV_VAR | jq '.value')
-#     - echo $OPENBLAS_BUILD_ID
-#     - echo ${OPENBLAS_BUILD_ID}
-
-# trigger_github_task:
-#   name: Trigger GitHub job
-#   depends_on: build_macos_wheels
-#   # only_if: $CIRRUS_BRANCH == 'main'
-#   macos_instance:
-#     image: ghcr.io/cirruslabs/macos-monterey-xcode
-#   clone_script:
-#     - echo SKIP CLONE
-#   download_script:
-#     - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/dispatches -d "{\"event_type\":\"macos_arm64_wheels\",\"client_payload\":{\"passed\":true,\"build_id\":\"${CIRRUS_BUILD_ID}\"}}"
+    - curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${DOWNLOAD_TOKEN}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/workflows/dowload_macos_arm64.yml/dispatches -d '{"ref":"'"${CIRRUS_BRANCH}"'","inputs":{"cirrus_build_id":"'"${CIRRUS_BUILD_ID}"'","check_id_macos_arm64":"'"${CHECK_ID_MACOS_ARM64}"'"}}'

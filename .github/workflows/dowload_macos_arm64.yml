@@ -1,3 +1,4 @@
+# TODO: check all names
 name: Download MacOS arm64 wheels
 run-name: Download MacOS arm64 wheels on branch '${{ github.ref_name }}'
 on:
@@ -7,14 +8,10 @@ on:
         description: 'CirrusCI build ID'
         required: true
         type: number
-      check_run_id:
-        description: Check run ID
+      check_id_macos_arm64:
+        description: Check ID MacOS arm64
         required: true
         type: number
-      passed:
-        description: 'CirrusCI build is passed'
-        required: true
-        type: boolean
 jobs:
   macos_arm64_wheels:
     name: '*-macosx_arm64'
