@@ -1,7 +1,6 @@
 name: Build wheels
-# run-name: Build Windows wheels on branch '${{ github.ref_name }}'
+run-name: Build wheels - commit ${{ github.sha }}
 on: push
-# on: workflow_dispatch
 jobs:
   build_windows_wheels:
     strategy:
@@ -58,7 +57,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download Compiled OpenBLAS
-        uses: dawidd6/action-download-artifact@v2 # TODO: only @v2??
+        uses: dawidd6/action-download-artifact@v2
         with:
           workflow: compile_OpenBLAS_macos.yml
           workflow_conclusion: success
