@@ -43,6 +43,7 @@ jobs:
         with:
           name: wheels_windows_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
+          if-no-files-found: error
 
   build_macos_wheels:
     strategy:
@@ -87,6 +88,7 @@ jobs:
         with:
           name: wheels_macos_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
+          if-no-files-found: error
 
   create_macos_arm64_check:
     name: Create MacOS arm64 check
@@ -148,6 +150,7 @@ jobs:
         with:
           name: wheels_linux_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
+          if-no-files-found: error
 
   build_source_distribution:
     name: sdist
@@ -178,6 +181,7 @@ jobs:
         with:
           name: sdist
           path: ./dist/*.tar.gz
+          if-no-files-found: error
 
   upload_wheels:
     needs: [build_windows_wheels, build_macos_wheels, build_linux_wheels, build_source_distribution]

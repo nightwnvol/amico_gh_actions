@@ -30,3 +30,4 @@ jobs:
         with:
           name: OpenBLAS_linux_${{ matrix.arch[0] }}
           path: ./OpenBLAS
+          if-no-files-found: error

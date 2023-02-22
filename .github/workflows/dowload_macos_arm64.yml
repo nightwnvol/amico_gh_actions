@@ -32,7 +32,7 @@ jobs:
         with:
           name: wheels_macos_arm64
           path: ./wheelhouse/*.whl
-          if-no-files-found: error # TODO: add also to others
+          if-no-files-found: error
 
       - name: Complete MacOS arm64 check
         if: env.res == 200 && steps.upload_artifacts.conclusion == 'success'

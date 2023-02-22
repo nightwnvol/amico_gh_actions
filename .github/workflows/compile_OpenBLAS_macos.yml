@@ -24,3 +24,4 @@ jobs:
         with:
           name: OpenBLAS_macos_${{ matrix.arch[0] }}
           path: ./OpenBLAS
+          if-no-files-found: error
