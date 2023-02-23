@@ -44,19 +44,69 @@ jobs:
           path: ./wheelhouse/*.whl
           if-no-files-found: error
 
-  build_macos_x86_64_wheels:
+  # build_macos_x86_64_wheels:
+  #   strategy:
+  #     matrix:
+  #       py: [cp36, cp37, cp38, cp39, cp310]
+  #       arch:
+  #         - [x86_64, macosx_x86_64]
+  #   name: ${{ matrix.py }}-${{ matrix.arch[1] }}
+  #   runs-on: macos-11
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Download Compiled OpenBLAS
+  #       uses: dawidd6/action-download-artifact@v2
+  #       with:
+  #         workflow: compile_OpenBLAS_macos.yml # TODO: compile_openblas_macos_x86_64.yml
+  #         workflow_conclusion: success
+  #         commit: ${{github.event.pull_request.head.sha}}
+  #         name: OpenBLAS_macos_${{ matrix.arch[0] }}
+  #         path: OpenBLAS
+  #         search_artifacts: true
+
+  #     - name: Set up the configuration file
+  #       run: |
+  #         python3 setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+
+  #     - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
+  #       uses: pypa/cibuildwheel@v2.12.0 # TODO: v2
+  #       env:
+  #         MACOSX_DEPLOYMENT_TARGET: 10.9
+  #         CIBW_PLATFORM: macos
+  #         CIBW_BUILD: ${{ matrix.py }}-${{ matrix.arch[1] }}
+  #         CIBW_ARCHS_MACOS: ${{ matrix.arch[0] }}
+  #         CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+  #           DYLD_LIBRARY_PATH=${{ github.workspace }}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+  #         CIBW_BEFORE_TEST_MACOS: >
+  #           7z x test/demo.zip -o"test/demo"
+
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheels_macos_${{ matrix.arch[0] }}
+  #         path: ./wheelhouse/*.whl
+  #         if-no-files-found: error
+
+    build_macos_x86_64_wheels:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
         arch:
           - [x86_64, macosx_x86_64]
+          - [arm64, macosx_arm64]
+        exclude:
+          - py: [cp36, cp37] # TODO: check this
+            arch: arm64
     name: ${{ matrix.py }}-${{ matrix.arch[1] }}
     runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download Compiled OpenBLAS
+      - name: Download Compiled OpenBLAS x86_64
+        if: matrix.arch[0] == 'x86_64'
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: compile_OpenBLAS_macos.yml # TODO: compile_openblas_macos_x86_64.yml
@@ -65,6 +115,12 @@ jobs:
           name: OpenBLAS_macos_${{ matrix.arch[0] }}
           path: OpenBLAS
           search_artifacts: true
+          
+      - name: Download Compiled OpenBLAS arm64
+        if: matrix.arch[0] == 'arm64'
+        run: |
+          curl -L -o OpenBLAS.zip https://api.cirrus-ci.com/v1/artifact/build/${{ vars.OPENBLAS_BUILD_ID }}/compile_OpenBLAS_macos/compiled_OpenBLAS/OpenBLAS_macos_arm64.zip
+          7z x OpenBLAS.zip -o"OpenBLAS"
 
       - name: Set up the configuration file
         run: |
