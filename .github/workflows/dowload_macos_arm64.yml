@@ -42,7 +42,7 @@ jobs:
 
   upload_wheels:
     needs: [macos_arm64_wheels]
-    if: ${{ github.ref_name == 'main' }}
+    # if: ${{ github.ref_name == 'main' }}
     name: Upload MacOS arm64 wheels
     runs-on: ubuntu-20.04
     steps:
