@@ -97,7 +97,9 @@ jobs:
           - [x86_64, macosx_x86_64]
           - [arm64, macosx_arm64]
         exclude:
-          - py: [cp36, cp37] # TODO: check this
+          - py: cp36
+            arch: arm64
+          - py: cp37
             arch: arm64
     name: ${{ matrix.py }}-${{ matrix.arch[1] }}
     runs-on: macos-11
