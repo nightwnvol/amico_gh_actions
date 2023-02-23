@@ -89,7 +89,7 @@ jobs:
   #         path: ./wheelhouse/*.whl
   #         if-no-files-found: error
 
-    build_macos_x86_64_wheels:
+  build_macos_x86_64_wheels:
     strategy:
       matrix:
         py: [cp36, cp37, cp38, cp39, cp310]
