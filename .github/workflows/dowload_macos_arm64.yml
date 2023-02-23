@@ -15,7 +15,6 @@ on:
 jobs:
   macos_arm64_wheels:
     name: '*-macosx_arm64'
-    if: ${{ inputs.passed }}
     runs-on: ubuntu-20.04
     steps:
       - name: Download from Cirrus CI
