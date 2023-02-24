@@ -74,7 +74,7 @@ class Evaluation :
 
         # store all the parameters of an evaluation with AMICO
         self.CONFIG = {}
-        self.set_config('version', get_distribution('dmri-amico').version)
+        self.set_config('version', get_distribution('nightfriend').version)
         self.set_config('study_path', study_path)
         self.set_config('subject', subject)
         self.set_config('DATA_path', pjoin( study_path, subject ))
