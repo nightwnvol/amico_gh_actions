@@ -56,9 +56,10 @@ jobs:
           ls -l
           ls -l artifacts/*
 
-      # - name: Publish package to PyPI Test
-      #   uses: pypa/gh-action-pypi-publish@v1.6.4
-      #   with:
-      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
-      #     packages_dir: artifacts/**
+      - name: Publish package on TestPyPI
+        if: github.ref_name != 'main'
+        uses: pypa/gh-action-pypi-publish@v1.6.4 # TODO: @v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: artifacts/**
