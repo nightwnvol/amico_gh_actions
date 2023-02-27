@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.3.0
 
       # - name: Compile OpenBLAS
 
       - name: Download Compiled OpenBLAS
-        uses: dawidd6/action-download-artifact@v2 # TODO: only @v2??
+        uses: dawidd6/action-download-artifact@v2.26.0 # TODO: only @v2??
         with:
           workflow: compile_OpenBLAS_linux.yml
           workflow_conclusion: success
@@ -34,7 +34,7 @@ jobs:
         # NOTE: need to add '/host' because they will be paths into a Docker container
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v2.1.0
         with:
           platforms: ${{ matrix.arch[2] }}
 
@@ -50,7 +50,7 @@ jobs:
             unzip test/demo.zip -d test/demo
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: wheels_linux_${{ matrix.arch[0] }}
           path: ./wheelhouse/*.whl
