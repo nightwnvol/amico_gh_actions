@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "setuptools",
-    "Cython>=0.29.32",
+    "setuptools>=59.6.0",
+    "Cython>=0.29.33",
     "cyspams @ git+https://github.com/getspams/spams-cython.git@test_cp36"
 ]
 build-backend = "setuptools.build_meta"
