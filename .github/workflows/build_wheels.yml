@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.3.0
 
-      - name: Download Compiled OpenBLAS
+      - name: Download compiled OpenBLAS
         run: |
           curl -L -o OpenBLAS-0.3.21.zip https://github.com/xianyi/OpenBLAS/releases/download/v0.3.21/OpenBLAS-0.3.21-${{ matrix.arch[2] }}.zip
           7z x OpenBLAS-0.3.21.zip -o"OpenBLAS"
@@ -56,10 +56,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.3.0
 
-      - name: Download Compiled OpenBLAS
+      - name: Download compiled OpenBLAS
         uses: dawidd6/action-download-artifact@v2.26.0
         with:
-          workflow: compile_OpenBLAS_macos.yml # TODO: compile_openblas_macos_x86_64.yml
+          workflow: compile_openblas_macos_x86_64.yml
           workflow_conclusion: success
           commit: ${{github.event.pull_request.head.sha}}
           name: OpenBLAS_macos_${{ matrix.arch[0] }}
@@ -90,11 +90,11 @@ jobs:
           if-no-files-found: error
 
   create_macos_arm64_check:
-    name: Create a check for MacOS arm64 wheels
+    name: Create MacOS arm64 check
     runs-on: ubuntu-20.04
     steps:
       - name: Create check
-        run: | # TODO: test env.CHECK_ID_MACOS_ARM64
+        run: |
           curl -X DELETE -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.REPO_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables/CHECK_ID_MACOS_ARM64
           CHECK_ID_MACOS_ARM64=$(curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ github.token }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/check-runs -d '{"name":"cp*-macosx_arm64","status":"in_progress","head_sha":"'"${{ github.sha }}"'"}' | jq -r .id)
           curl -X POST -H "Accept:application/vnd.github+json" -H "Authorization:Bearer ${{ secrets.REPO_TOKEN }}" -H "X-GitHub-Api-Version:2022-11-28" https://api.github.com/repos/nightwnvol/amico_gh_actions/actions/variables -d '{"name":"CHECK_ID_MACOS_ARM64","value":"'"$CHECK_ID_MACOS_ARM64"'"}'
@@ -112,10 +112,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.3.0
 
-      - name: Download Compiled OpenBLAS
+      - name: Download compiled OpenBLAS
         uses: dawidd6/action-download-artifact@v2.26.0
         with:
-          workflow: compile_OpenBLAS_linux.yml # TODO: compile_openblas_linux.yml
+          workflow: compile_openblas_linux.yml
           workflow_conclusion: success
           commit: ${{github.event.pull_request.head.sha}}
           name: OpenBLAS_linux_${{ matrix.arch[0] }}

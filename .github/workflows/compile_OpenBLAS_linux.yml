@@ -1,7 +1,8 @@
 name: Compile OpenBLAS on Linux
+run-name: TODO
 on: workflow_dispatch
 jobs:
-  compile_OpenBLAS:
+  compile_openblas:
     strategy:
       matrix:
           arch:
@@ -9,7 +10,7 @@ jobs:
             - [aarch64, manylinux2014_aarch64, ARMV8, arm64]
     name: ${{ matrix.arch[0] }}
     runs-on: ubuntu-20.04
-    timeout-minutes: 600
+    timeout-minutes: 600 # NOTE: need this to compile the arm64 version
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2.1.0
