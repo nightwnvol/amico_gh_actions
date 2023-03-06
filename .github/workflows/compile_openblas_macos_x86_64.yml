@@ -1,7 +1,8 @@
-name: Compile OpenBLAS on MacOS
+name: Compile OpenBLAS on MacOS x86_64
+run-name: TODO
 on: workflow_dispatch
 jobs:
-  compile_OpenBLAS:
+  compile_openblas:
     strategy:
       matrix:
         arch:
@@ -20,7 +21,8 @@ jobs:
           make install -C OpenBLAS-0.3.21 PREFIX=${GITHUB_WORKSPACE}/OpenBLAS
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: OpenBLAS_macos_${{ matrix.arch[0] }}
           path: ./OpenBLAS
+          if-no-files-found: error
