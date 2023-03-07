@@ -4,6 +4,7 @@ import cyspams
 import sys
 import os
 import configparser
+from multiprocessing import cpu_count
 
 libraries = []
 library_dirs = []
@@ -75,5 +76,5 @@ extensions = [
 ]
 
 setup(
-      ext_modules=cythonize(extensions)
+      ext_modules=cythonize(extensions, nthreads=cpu_count())
 )

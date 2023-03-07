@@ -74,7 +74,7 @@ class Evaluation :
 
         # store all the parameters of an evaluation with AMICO
         self.CONFIG = {}
-        self.set_config('version', get_distribution('dmri-amico').version)
+        self.set_config('version', get_distribution('nightfriend').version)
         self.set_config('study_path', study_path)
         self.set_config('subject', subject)
         self.set_config('DATA_path', pjoin( study_path, subject ))
@@ -133,7 +133,7 @@ class Evaluation :
         self.set_config('b0_min_signal', b0_min_signal)
         self.set_config('replace_bad_voxels', replace_bad_voxels)
         self.niiDWI = nibabel.load( pjoin(self.get_config('DATA_path'), dwi_filename) )
-        self.niiDWI_img = self.niiDWI.get_data().astype(np.float32)
+        self.niiDWI_img = self.niiDWI.get_fdata().astype(np.float32)
         hdr = self.niiDWI.header if nibabel.__version__ >= '2.0.0' else self.niiDWI.get_header()
         if self.niiDWI_img.ndim != 4 :
             ERROR( 'DWI file is not a 4D image' )
@@ -177,7 +177,7 @@ class Evaluation :
             if not isfile( pjoin(self.get_config('DATA_path'), mask_filename) ):
                 ERROR( 'MASK file not found' )
             self.niiMASK = nibabel.load( pjoin( self.get_config('DATA_path'), mask_filename) )
-            self.niiMASK_img = self.niiMASK.get_data().astype(np.uint8)
+            self.niiMASK_img = self.niiMASK.get_fdata().astype(np.uint8)
             niiMASK_hdr = self.niiMASK.header if nibabel.__version__ >= '2.0.0' else self.niiMASK.get_header()
             PRINT('\t\t- dim    = %d x %d x %d' % self.niiMASK_img.shape[:3])
             PRINT('\t\t- pixdim = %.3f x %.3f x %.3f' % niiMASK_hdr.get_zooms()[:3])
@@ -436,7 +436,7 @@ class Evaluation :
             if not isfile( pjoin(self.get_config('DATA_path'), peaks_filename) ):
                 ERROR( 'PEAKS file not found' )
             niiPEAKS = nibabel.load( pjoin( self.get_config('DATA_path'), peaks_filename) )
-            self.DIRs = niiPEAKS.get_data().astype(np.float32)
+            self.DIRs = niiPEAKS.get_fdata().astype(np.float32)
             PRINT('\t* peaks dim = %d x %d x %d x %d' % self.DIRs.shape[:4])
             if self.DIRs.shape[:3] != self.niiMASK_img.shape[:3] :
                 ERROR( 'PEAKS geometry does not match with DWI data' )
