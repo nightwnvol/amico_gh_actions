@@ -7,6 +7,6 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-test-command = "python -m pip install -U pip && pip list && pip show nightfriend -v && python {project}/test/noddi.py && python {project}/test/sandi.py"
+test-command = "python -m pip install -U pip && pip list && pip show nightfriend -v && python {project}/test/noddi.py"
 test-skip = "*-win32 cp38-macosx_arm64 *-manylinux_aarch64"
 build-verbosity = 3

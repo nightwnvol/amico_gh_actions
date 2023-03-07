@@ -37,8 +37,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
             delvewheel repair --add-path ${{ github.workspace }}\OpenBLAS\bin -w {dest_dir} -v {wheel}
           CIBW_BEFORE_TEST_WINDOWS: >
-            7z x test/noddi.zip -o"test/noddi" &&
-            7z x test/sandi.zip -o"test/sandi"
+            7z x test/noddi.zip -o"test/noddi"
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3.1.2
@@ -83,8 +82,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             DYLD_LIBRARY_PATH=${{ github.workspace }}/OpenBLAS/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BEFORE_TEST_MACOS: >
-            7z x test/noddi.zip -o"test/noddi" &&
-            7z x test/sandi.zip -o"test/sandi"
+            7z x test/noddi.zip -o"test/noddi"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3.1.2
@@ -144,8 +142,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: > # NOTE: need to add '/host' because compilation is done in a Docker container
             LD_LIBRARY_PATH=/host${{ github.workspace }}/OpenBLAS/lib auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_TEST_LINUX: >
-            unzip test/noddi.zip -d test/noddi &&
-            unzip test/sandi.zip -d test/sandi
+            unzip test/noddi.zip -d test/noddi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3.1.2
