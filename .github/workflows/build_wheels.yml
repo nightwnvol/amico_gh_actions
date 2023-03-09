@@ -1,5 +1,8 @@
 name: Build wheels
 run-name: Build wheels - ${{ github.sha }}
+concurrency:
+  group: build
+  cancel-in-progress: true
 on: push
 jobs:
   build_windows_wheels:
@@ -196,3 +199,25 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
           packages_dir: artifacts/**
+
+  # publish_wheels:
+  #   needs: [build_windows_wheels, build_macos_x86_64_wheels, build_linux_wheels, build_source_distribution]
+  #   if: ${{ github.ref_name == 'main' }}
+  #   name: Publish wheels and sdist on PyPi
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v3.0.2
+  #       with:
+  #         path: artifacts
+
+  #     - name: List dir
+  #       run: |
+  #         ls -l
+  #         ls -l artifacts/*
+        
+  #     - name: Publish on PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.6.4
+  #       with:
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
+  #         packages_dir: artifacts/**
