@@ -1,4 +1,4 @@
-# Download list
+# Links for nightfriend
 
 [nightfriend-2.0.0.dev0-cp310-cp310-win32.whl](https://github.com/nightwnvol/amico_gh_actions/releases/download/2.0.0dev0/nightfriend-2.0.0.dev0-cp310-cp310-win32.whl)
 
