@@ -1,7 +1,7 @@
 name: Build wheels
 run-name: Build wheels - ${{ github.sha }}
 concurrency:
-  group: build
+  group: build_wheels
   cancel-in-progress: true
 on: push
 jobs:
