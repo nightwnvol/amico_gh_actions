@@ -62,3 +62,25 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
           packages_dir: artifacts/**
+
+  # publish_macos_arm64_wheels:
+  #   needs: [macos_arm64_wheels]
+  #   if: ${{ github.ref_name == 'main' }}
+  #   name: Publish MacOS arm64 wheels on PyPi
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v3.0.2
+  #       with:
+  #         path: artifacts
+
+  #     - name: List dir
+  #       run: |
+  #         ls -l
+  #         ls -l artifacts/*
+
+  #     - name: Publish on PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.6.4
+  #       with:
+  #         password: ${{ secrets.PYPI_API_TOKEN }}
+  #         packages_dir: artifacts/**
