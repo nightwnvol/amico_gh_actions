@@ -2,7 +2,7 @@
 compile_openblas_macos_arm64_task:
   name: Compile OpenBLAS on MacOS arm64
   alias: compile_openblas_macos_arm64
-  auto-cancellation: ${CIRRUS_BRANCH} == 'master' && ${CIRRUS_BRANCH} != 'master'
+  auto-cancellation: ${CIRRUS_BRANCH} == 'main' && ${CIRRUS_BRANCH} != 'main'
   trigger_type: manual
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
