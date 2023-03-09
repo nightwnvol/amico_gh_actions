@@ -26,7 +26,7 @@ compile_openblas_macos_arm64_task:
 build_macos_arm64_wheels_task:
   name: Build MacOS arm64 wheels
   alias: build_macos_arm64_wheels
-  auto-cancellation: ${CIRRUS_BRANCH} == 'main' && ${CIRRUS_BRANCH} != 'main'
+  auto-cancellation: ${CIRRUS_BRANCH} == 'main' || ${CIRRUS_BRANCH} != 'main'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode
   matrix:
