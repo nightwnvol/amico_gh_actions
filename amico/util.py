@@ -273,10 +273,10 @@ class Loader:
             for step in itertools.cycle(self._steps):
                 if self._done:
                     break
-                print(f"\r\t* {self.message}  {step}", end='', flush=True)
+                print(f'\r\t* {self.message}  {step}', end='', flush=True)
                 time.sleep(self.timeout)
         if self.verbose == 2:
-            print(f"\t* {self.message}", end='', flush=True)
+            print(f'\t* {self.message}', end='', flush=True)
 
     def start(self):
         self._thread.start()
@@ -285,6 +285,6 @@ class Loader:
         self._done = True
         if self.verbose == 3:
             print(f"\r\t  {' ' * (len(self.message) + 2 + self._n)}", end='', flush=True)
-            print(f"\r\t* {self.message}  {self.end}")
+            print(f'\r\t* {self.message}  {self.end}')
         if self.verbose == 2:
-            print(f"  {self.end}")
+            print(f'  {self.end}')

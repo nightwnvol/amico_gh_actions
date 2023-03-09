@@ -10,7 +10,6 @@ from tqdm import tqdm
 from abc import ABC, abstractmethod
 from amico.util import PRINT, ERROR, get_verbose
 from amico.synthesis import Stick, Zeppelin, Ball, CylinderGPD, SphereGPD, Astrosticks, NODDIIntraCellular, NODDIExtraCellular, NODDIIsotropic
-# from joblib import Parallel, delayed
 from concurrent.futures import ThreadPoolExecutor
 
 cimport cython
@@ -114,7 +113,7 @@ class BaseModel(ABC) :
         params : dictionary
             All the parameters that the solver will need to fit the model
         """
-        self._solver_params = {}
+        self.solver_params = {}
 
 
     @abstractmethod
@@ -198,9 +197,6 @@ class BaseModel(ABC) :
             'compute_rmse': evaluation.get_config('doComputeRMSE'),
             'compute_nrmse': evaluation.get_config('doComputeNRMSE')
         }
-
-        # fit results
-        self.results = {}
 
 
 
@@ -391,8 +387,8 @@ class CylinderZeppelinBall( BaseModel ) :
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 4.0 ) :
         super().set_solver()
-        self._solver_params['lambda1'] = lambda1
-        self._solver_params['lambda2'] = lambda2
+        self.solver_params['lambda1'] = lambda1
+        self.solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ) :
@@ -481,33 +477,23 @@ class CylinderZeppelinBall( BaseModel ) :
 
         # fit chunks in parallel
         with ThreadPoolExecutor(max_workers=evaluation.n_threads) as executor:
-            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks]
+            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS) for i, j in self.chunks]
             chunked_results = [f.result() for f in futures]
         
         # concatenate results and return
+        results = {}
         for k in chunked_results[0]:
-            self.results[k] = np.concatenate([cr[k] for cr in chunked_results])
-        return self.results
-    
-        # # fit chunks in parallel
-        # chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
-
-        # # return
-        # self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
-        # if self.configs['compute_rmse']:
-        #     self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
-        # if self.configs['compute_nrmse']:
-        #     self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
-        # return self.results
+            results[k] = np.concatenate([cr[k] for cr in chunked_results])
+        return results
 
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    def _fit(self, y, dirs, hash_table, kernels, solver_params, configs):
+    def _fit(self, y, dirs, hash_table, kernels):
         # configs
         cdef bint is_exvivo = 1 if self.isExvivo else 0
-        cdef bint compute_rmse = 1 if configs['compute_rmse'] else 0
-        cdef bint compute_nrmse = 1 if configs['compute_nrmse'] else 0
+        cdef bint compute_rmse = 1 if self.configs['compute_rmse'] else 0
+        cdef bint compute_nrmse = 1 if self.configs['compute_nrmse'] else 0
         cdef int n_rs = len(self.Rs)
         cdef int n_perp = len(self.d_perps)
         cdef int n_iso = len(self.d_isos)
@@ -517,8 +503,8 @@ class CylinderZeppelinBall( BaseModel ) :
             n_atoms += 1
 
         # solver params
-        cdef double lambda1 = solver_params['lambda1']
-        cdef double lambda2 = solver_params['lambda2']
+        cdef double lambda1 = self.solver_params['lambda1']
+        cdef double lambda2 = self.solver_params['lambda2']
 
         # directions
         if not dirs.flags['C_CONTIGUOUS']:
@@ -660,8 +646,8 @@ class NODDI( BaseModel ) :
 
     def set_solver( self, lambda1 = 5e-1, lambda2 = 1e-3 ):
         super().set_solver()
-        self._solver_params['lambda1'] = lambda1
-        self._solver_params['lambda2'] = lambda2
+        self.solver_params['lambda1'] = lambda1
+        self.solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ):
@@ -738,37 +724,25 @@ class NODDI( BaseModel ) :
 
         # fit chunks in parallel
         with ThreadPoolExecutor(max_workers=evaluation.n_threads) as executor:
-            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks]
+            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS) for i, j in self.chunks]
             chunked_results = [f.result() for f in futures]
         
         # concatenate results and return
+        results = {}
         for k in chunked_results[0]:
-            self.results[k] = np.concatenate([cr[k] for cr in chunked_results])
-        return self.results
-
-        # # fit chunks in parallel
-        # chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
-
-        # # return
-        # self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
-        # if self.configs['compute_rmse']:
-        #     self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
-        # if self.configs['compute_nrmse']:
-        #     self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
-        # if self.configs['compute_modulated_maps']:
-        #     self.results['estimates_mod'] = np.concatenate([cr['estimates_mod'] for cr in chunked_results])
-        # return self.results
+            results[k] = np.concatenate([cr[k] for cr in chunked_results])
+        return results
 
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    def _fit(self, y, dirs, hash_table, kernels, solver_params, configs):
+    def _fit(self, y, dirs, hash_table, kernels):
         # configs
         cdef bint is_exvivo = 1 if self.isExvivo else 0
         cdef bint single_b0 = 1 if y.shape[1] == (1 + self.scheme.dwi_count) else 0
-        cdef bint compute_rmse = 1 if configs['compute_rmse'] else 0
-        cdef bint compute_nrmse = 1 if configs['compute_nrmse'] else 0
-        cdef bint compute_modulated_maps = 1 if configs['compute_modulated_maps'] else 0
+        cdef bint compute_rmse = 1 if self.configs['compute_rmse'] else 0
+        cdef bint compute_nrmse = 1 if self.configs['compute_nrmse'] else 0
+        cdef bint compute_modulated_maps = 1 if self.configs['compute_modulated_maps'] else 0
         cdef long long [::1]dwi_idx_view = self.scheme.dwi_idx
         cdef int n_wm = len(self.IC_ODs) * len(self.IC_VFs)
         cdef int n_atoms = n_wm + 1
@@ -776,8 +750,8 @@ class NODDI( BaseModel ) :
             n_atoms += 1
 
         # solver params
-        cdef double lambda1 = solver_params['lambda1']
-        cdef double lambda2 = solver_params['lambda2']
+        cdef double lambda1 = self.solver_params['lambda1']
+        cdef double lambda2 = self.solver_params['lambda2']
 
         # directions
         cdef double [:, ::1]directions_view = np.ascontiguousarray(dirs)
@@ -1003,8 +977,8 @@ class FreeWater( BaseModel ) :
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 1e-3 ):
         super().set_solver()
-        self._solver_params['lambda1'] = lambda1
-        self._solver_params['lambda2'] = lambda2
+        self.solver_params['lambda1'] = lambda1
+        self.solver_params['lambda2'] = lambda2
 
         # TODO check this
         # need more regul for mouse data
@@ -1077,43 +1051,31 @@ class FreeWater( BaseModel ) :
 
         # fit chunks in parallel
         with ThreadPoolExecutor(max_workers=evaluation.n_threads) as executor:
-            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks]
+            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS) for i, j in self.chunks]
             chunked_results = [f.result() for f in futures]
         
         # concatenate results and return
+        results = {}
         for k in chunked_results[0]:
-            self.results[k] = np.concatenate([cr[k] for cr in chunked_results])
-        return self.results
-
-        # # fit chunks in parallel
-        # chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.DIRs[i:j, :], evaluation.htable, evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
-
-        # # return
-        # self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
-        # if self.configs['compute_rmse']:
-        #     self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
-        # if self.configs['compute_nrmse']:
-        #     self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
-        # if self.configs['save_corrected_DWI']:
-        #     self.results['y_corrected'] = np.concatenate([cr['y_corrected'] for cr in chunked_results])
-        # return self.results
+            results[k] = np.concatenate([cr[k] for cr in chunked_results])
+        return results
 
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    def _fit(self, y, dirs, hash_table, kernels, solver_params, configs):
+    def _fit(self, y, dirs, hash_table, kernels):
         # configs
         cdef bint is_mouse = 1 if self.type == 'Mouse' else 0
-        cdef bint compute_rmse = 1 if configs['compute_rmse'] else 0
-        cdef bint compute_nrmse = 1 if configs['compute_nrmse'] else 0
-        cdef bint save_corrected_DWI = 1 if configs['save_corrected_DWI'] else 0
+        cdef bint compute_rmse = 1 if self.configs['compute_rmse'] else 0
+        cdef bint compute_nrmse = 1 if self.configs['compute_nrmse'] else 0
+        cdef bint save_corrected_DWI = 1 if self.configs['save_corrected_DWI'] else 0
         cdef int n_perp = len(self.d_perps)
         cdef int n_iso = len(self.d_isos)
         cdef int n_atoms = n_perp + n_iso
 
         # solver params
-        cdef double lambda1 = solver_params['lambda1']
-        cdef double lambda2 = solver_params['lambda2']
+        cdef double lambda1 = self.solver_params['lambda1']
+        cdef double lambda2 = self.solver_params['lambda2']
 
         # directions
         cdef double [:, ::1]directions_view = np.ascontiguousarray(dirs)
@@ -1315,8 +1277,8 @@ class SANDI( BaseModel ) :
 
     def set_solver( self, lambda1 = 0.0, lambda2 = 5.0E-3 ) :
         super().set_solver()
-        self._solver_params['lambda1'] = lambda1
-        self._solver_params['lambda2'] = lambda2
+        self.solver_params['lambda1'] = lambda1
+        self.solver_params['lambda2'] = lambda2
 
 
     def generate( self, out_path, aux, idx_in, idx_out, ndirs ) :
@@ -1402,40 +1364,30 @@ class SANDI( BaseModel ) :
 
         # fit chunks in parallel
         with ThreadPoolExecutor(max_workers=evaluation.n_threads) as executor:
-            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks]
+            futures = [executor.submit(self._fit, evaluation.y[i:j, :], evaluation.KERNELS) for i, j in self.chunks]
             chunked_results = [f.result() for f in futures]
         
         # concatenate results and return
+        results = {}
         for k in chunked_results[0]:
-            self.results[k] = np.concatenate([cr[k] for cr in chunked_results])
-        return self.results
-
-        # # fit chunks in parallel
-        # chunked_results = Parallel(n_jobs=evaluation.n_threads, prefer='threads')(delayed(self._fit)(evaluation.y[i:j, :], evaluation.KERNELS, self._solver_params, self.configs) for i, j in self.chunks)
-
-        # # return
-        # self.results['estimates'] = np.concatenate([cr['estimates'] for cr in chunked_results])
-        # if self.configs['compute_rmse']:
-        #     self.results['rmse'] = np.concatenate([cr['rmse'] for cr in chunked_results])
-        # if self.configs['compute_nrmse']:
-        #     self.results['nrmse'] = np.concatenate([cr['nrmse'] for cr in chunked_results])
-        # return self.results
+            results[k] = np.concatenate([cr[k] for cr in chunked_results])
+        return results
 
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    def _fit(self, y, kernels, solver_params, configs):
+    def _fit(self, y, kernels):
         # configs
-        cdef bint compute_rmse = 1 if configs['compute_rmse'] else 0
-        cdef bint compute_nrmse = 1 if configs['compute_nrmse'] else 0
+        cdef bint compute_rmse = 1 if self.configs['compute_rmse'] else 0
+        cdef bint compute_nrmse = 1 if self.configs['compute_nrmse'] else 0
         cdef int n_rs = len(self.Rs)
         cdef int n_in = len(self.d_in)
         cdef int n_iso = len(self.d_isos)
         cdef int n_atoms = n_rs + n_in + n_iso
 
         # solver params
-        cdef double lambda1 = solver_params['lambda1']
-        cdef double lambda2 = solver_params['lambda2']
+        cdef double lambda1 = self.solver_params['lambda1']
+        cdef double lambda2 = self.solver_params['lambda2']
 
         # kernels
         if not kernels['signal'].flags['F_CONTIGUOUS']:

@@ -4,7 +4,7 @@ import numpy as np
 import time
 import glob
 import sys
-from os import makedirs, remove
+from os import makedirs, remove, cpu_count
 from os.path import exists, join as pjoin, isfile
 import inspect
 
@@ -19,7 +19,6 @@ from dipy.core.gradients import gradient_table
 import dipy.reconst.dti as dti
 from amico.util import PRINT, LOG, WARNING, ERROR, get_verbose, Loader
 from pkg_resources import get_distribution
-from joblib import cpu_count
 from threadpoolctl import ThreadpoolController
 from tqdm import tqdm
 
@@ -74,7 +73,7 @@ class Evaluation :
 
         # store all the parameters of an evaluation with AMICO
         self.CONFIG = {}
-        self.set_config('version', get_distribution('nightfriend').version)
+        self.set_config('version', get_distribution('dmri-amico').version)
         self.set_config('study_path', study_path)
         self.set_config('subject', subject)
         self.set_config('DATA_path', pjoin( study_path, subject ))
@@ -301,12 +300,14 @@ class Evaluation :
     def set_solver( self, **params ) :
         """Set up the specific parameters of the solver to fit the model.
         Dispatch to the proper function, depending on the model; a model should provide a "set_solver" function to set these parameters.
+        Currently supported parameters are:
         StickZeppelinBall:      'set_solver()' not implemented
         CylinderZeppelinBall:   lambda1 = 0.0, lambda2 = 4.0
         NODDI:                  lambda1 = 5e-1, lambda2 = 1e-3
         FreeWater:              lambda1 = 0.0, lambda2 = 1e-3
         VolumeFractions:        'set_solver()' not implemented
         SANDI:                  lambda1 = 0.0, lambda2 = 5e-3
+        NOTE: non-existing parameters will be ignored
         """
         if self.model is None :
             ERROR( 'Model not set; call "set_model()" method first' )
@@ -438,7 +439,7 @@ class Evaluation :
             niiPEAKS = nibabel.load( pjoin( self.get_config('DATA_path'), peaks_filename) )
             self.DIRs = niiPEAKS.get_fdata().astype(np.float32)
             PRINT('\t* peaks dim = %d x %d x %d x %d' % self.DIRs.shape[:4])
-            if self.DIRs.shape[:3] != self.niiMASK_img.shape[:3] :
+            if self.DIRs.shape[:3] != self.niiMASK_img.shape[:3]:
                 ERROR( 'PEAKS geometry does not match with DWI data' )
             DTI = None
 
@@ -633,7 +634,7 @@ class Evaluation :
                 PRINT(' [OK]')
 
                 PRINT('\t- dir_avg.scheme', end=' ')
-                np.savetxt( pjoin(RESULTS_path, 'dir_avg.scheme' ), self.scheme.get_table(), fmt="%.06f", delimiter="\t", header=f"VERSION: {self.scheme.version}", comments='' )
+                np.savetxt( pjoin(RESULTS_path, 'dir_avg.scheme' ), self.scheme.get_table(), fmt="%.06f", delimiter="\t", header=f'VERSION: {self.scheme.version}', comments='' )
                 PRINT(' [OK]')
             else:
                 WARNING('The directional average signal was not created (The option doDirectionalAverage is False).')
