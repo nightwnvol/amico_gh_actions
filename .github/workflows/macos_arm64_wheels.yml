@@ -1,8 +1,5 @@
 name: MacOS arm64 wheels
 run-name: MacOS arm64 wheels - ${{ github.sha }}
-concurrency:
-  group: macos_arm64_wheels
-  cancel-in-progress: true
 on:
   workflow_dispatch:
     inputs:
