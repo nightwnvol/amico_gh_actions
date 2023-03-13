@@ -11,6 +11,15 @@
 [![GitHub contributors](https://img.shields.io/github/contributors-anon/daducci/AMICO?style=social&link)](#)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ADaducci)](https://twitter.com/intent/follow?screen_name=ADaducci)
 
+![example workflow](https://github.com/nightwnvol/amico_gh_actions/actions/workflows/compile_openblas_macos_x86_64.yml/badge.svg)
+![example workflow](https://github.com/nightwnvol/amico_gh_actions/actions/workflows/compile_openblas_linux.yml/badge.svg)
+![example workflow](https://github.com/nightwnvol/amico_gh_actions/actions/workflows/build_wheels.yml/badge.svg)
+![example workflow](https://github.com/nightwnvol/amico_gh_actions/actions/workflows/macos_arm64_wheels.yml/badge.svg)
+
+![Build Status](https://api.cirrus-ci.com/github/nightwnvol/amico_gh_actions.svg?task=Compile%20OpenBLAS%20on%20MacOS%20arm64)
+![Build Status](https://api.cirrus-ci.com/github/nightwnvol/amico_gh_actions.svg?task=Build%20MacOS%20arm64%20wheels)
+
+
 # AMICO
 
 Implementation of the linear framework for Accelerated Microstructure Imaging via Convex Optimization (AMICO) described here:
