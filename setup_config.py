@@ -12,9 +12,9 @@ args = parser.parse_args()
 # write the site.cfg file
 config = configparser.ConfigParser()
 config[args.config] = {
-    'library': args.libraries,
-    'library_dir': args.library_dirs,
-    'include_dir': args.include_dirs
+    'library': args.library,
+    'library_dir': args.library_dir,
+    'include_dir': args.include_dir
 }
 with open('site.cfg', 'a') as configfile:
     config.write(configfile)
