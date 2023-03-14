@@ -22,7 +22,7 @@ jobs:
 
       - name: Set up the configuration file
         run: |
-          python setup_config.py openblas libopenblas ${{ github.workspace }}\OpenBLAS\lib ${{ github.workspace }}\OpenBLAS\include
+          python setup_site.py openblas libopenblas ${{ github.workspace }}\OpenBLAS\lib ${{ github.workspace }}\OpenBLAS\include
 
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
@@ -68,7 +68,7 @@ jobs:
 
       - name: Set up the configuration file
         run: |
-          python3 setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+          python3 setup_site.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
 
       - name: Build wheel ${{ matrix.py }}-${{ matrix.arch[1] }}
         uses: pypa/cibuildwheel@v2.12.0
@@ -124,7 +124,7 @@ jobs:
 
       - name: Set up the configuration file
         run: | # NOTE: need to add '/host' because compilation is done in a Docker container
-          python setup_config.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
+          python setup_site.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2.1.0
@@ -158,7 +158,7 @@ jobs:
 
       - name: Set up the configuration file
         run: |
-          python setup_config.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
+          python setup_site.py openblas openblas ${{ github.workspace }}/OpenBLAS/lib ${{ github.workspace }}/OpenBLAS/include
 
       - name: Build source distribution
         run: |

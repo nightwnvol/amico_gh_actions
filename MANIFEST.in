@@ -1,7 +1,7 @@
 include README.md
 include LICENSE
 include site.cfg
-include setup_config.py
+include setup_site.py
 
 include amico/*pyx
 include amico/*pxd

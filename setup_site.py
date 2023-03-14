@@ -3,10 +3,10 @@ import argparse
 
 # parse arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('config', type=str)
-parser.add_argument('library', type=str)
-parser.add_argument('library_dir', type=str)
-parser.add_argument('include_dir', type=str)
+parser.add_argument('config', type=str, help='Config section name')
+parser.add_argument('library', type=str, help='Library name')
+parser.add_argument('library_dir', type=str, help='Library directory path')
+parser.add_argument('include_dir', type=str, help='Include directory path')
 args = parser.parse_args()
 
 # write the site.cfg file

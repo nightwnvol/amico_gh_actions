@@ -30,7 +30,7 @@ jobs:
 
       - name: Set up configuration file
         run: |
-          python setup_config.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
+          python setup_site.py openblas openblas /host${{ github.workspace }}/OpenBLAS/lib /host${{ github.workspace }}/OpenBLAS/include
         # NOTE: need to add '/host' because they will be paths into a Docker container
 
       - name: Set up QEMU
