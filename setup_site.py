@@ -1,5 +1,6 @@
 import configparser
 import argparse
+import shutil
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -16,5 +17,6 @@ config[args.config] = {
     'library_dir': args.library_dir,
     'include_dir': args.include_dir
 }
+shutil.copyfile('site.cfg.example', 'site.cfg')
 with open('site.cfg', 'a') as configfile:
     config.write(configfile)

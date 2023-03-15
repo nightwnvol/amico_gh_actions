@@ -5,7 +5,6 @@ import cyspams
 import sys
 from os import cpu_count
 import configparser
-import shutil
 
 # parallel compilation
 class build_ext(_build_ext):
@@ -20,7 +19,6 @@ extra_compile_args = []
 # spams-cython headers
 include_dirs.extend(cyspams.get_include())
 # OpenBLAS headers
-shutil.copyfile('site.cfg.example', 'site.cfg')
 config = configparser.ConfigParser()
 config.read('site.cfg')
 if 'openblas' in config:
