@@ -1,3 +1,6 @@
+# This is an example site.cfg file for dmri-amico. Create a copy of this file, rename
+# it to site.cfg and follow the instructions below.
+#
 # This file provides configuration information about non-Python dependencies for
 # the dmri-amico package. The format of the file is that provided by the ConfigParser
 # class in the standard library. See https://docs.python.org/3/library/configparser.html
@@ -14,7 +17,7 @@
 #
 #   library
 #       Name of the OpenBLAS library (without the extension).
-#       On Windowns:
+#       On Windows:
 #           library = libopenblas
 #       On MacOS/Linux:
 #           library = openblas
