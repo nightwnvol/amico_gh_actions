@@ -7,6 +7,6 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-test-command = "python -m pip install -U pip && pip list && pip show dmri-amico -v && python {project}/test/noddi.py"
+test-command = "python -m pip install -U pip && pip list && pip show dmri-amico -v && python {project}/test/noddi.py && pip install dmri-amico==1.5.4 --no-cache-dir --force-reinstall && pip show dmri-amico && python {project}/test/noddi.py"
 test-skip = "*-win32 cp38-macosx_arm64 *-manylinux_aarch64"
 build-verbosity = 3
